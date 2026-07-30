@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    var(--font-main), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --font-logo: var(--font-wordmark-family), ui-sans-serif, system-ui, sans-serif;
+  --font-wordmark: var(--font-wordmark-family), ui-sans-serif, system-ui, sans-serif;
+  --color-brand: #111827;
+  --color-brand-accent: #6366f1;
+  --color-surface: #fafaf5;
+  --color-surface-muted: #f3f3ee;
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-text font-sans antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
