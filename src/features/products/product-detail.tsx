@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui/price";
@@ -73,6 +74,7 @@ type AddToCartButtonProps = {
 };
 
 export function AddToCartButton({ variantId, disabled }: AddToCartButtonProps) {
+  const t = useTranslations("product");
   const addToCart = useAddToCart();
 
   return (
@@ -81,7 +83,7 @@ export function AddToCartButton({ variantId, disabled }: AddToCartButtonProps) {
       disabled={disabled || addToCart.isPending}
       onClick={() => addToCart.mutate({ merchandiseId: variantId })}
     >
-      {addToCart.isPending ? "Adding..." : "Add to cart"}
+      {addToCart.isPending ? t("adding") : t("addToCart")}
     </Button>
   );
 }

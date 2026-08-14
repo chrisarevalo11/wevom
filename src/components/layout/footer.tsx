@@ -3,6 +3,10 @@
 import { usePathname } from "next/navigation";
 import { FooterBodyLinks } from "@/components/layout/footer-body-links";
 import { FooterBodyCanvas } from "@/components/three/footer-body-canvas";
+import { REVERSED_E, ReversedEText } from "@/components/ui/reversed-e-text";
+
+/** Bump when the year turns — deliberately fixed rather than read from the clock */
+const COPYRIGHT_YEAR = 2026;
 
 /**
  * On the home page this stays transparent and empty: the fixed body layer sits at a lower
@@ -30,6 +34,11 @@ export function Footer() {
       )}
 
       <FooterBodyLinks />
+
+      {/* Sits under the body, clear of the page's bottom edge */}
+      <p className="absolute inset-x-0 bottom-8 text-center font-sans text-sm uppercase tracking-[0.24em] sm:bottom-10 sm:text-xs">
+        <ReversedEText text={`${REVERSED_E} V O M © ${COPYRIGHT_YEAR}`} />
+      </p>
     </footer>
   );
 }

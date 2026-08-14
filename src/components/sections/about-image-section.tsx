@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Pulled up over the tail of the (still sticky) video section so the image reads as
@@ -7,7 +7,9 @@ import Link from "next/link";
  */
 const OVERLAP = "100dvh";
 
-export function AboutImageSection() {
+export async function AboutImageSection() {
+  const t = await getTranslations("home");
+
   return (
     <section
       className="relative z-10 h-[150dvh] w-full bg-surface-muted py-10"
@@ -23,13 +25,14 @@ export function AboutImageSection() {
         aria-hidden
       />
 
+      {/*
+       * Was a link to /about. That route is off until the page is ready, so the label stays
+       * as the caption over the image — restore the Link when the page ships.
+       */}
       <div className="sticky top-1/2 flex -translate-y-1/2 justify-center pt-5">
-        <Link
-          href="/about"
-          className="font-sans text uppercase tracking-[0.25em] text-black transition-opacity hover:opacity-70 sm:text-base"
-        >
-          Sobre EVOM
-        </Link>
+        <p className="font-sans text uppercase tracking-[0.25em] text-black sm:text-base">
+          {t("aboutCta")}
+        </p>
       </div>
     </section>
   );

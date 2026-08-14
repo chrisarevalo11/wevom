@@ -255,8 +255,23 @@ function LoadedBodyModel({ enableStretch }: { enableStretch: boolean }) {
   const model = useMemo(() => {
     const cloned = scene.clone();
     cleanupScene(cloned);
+
+    /*
+     * Object3D.clone() shares geometry between clones, and the stretch writes new vertex
+     * positions straight into the position attribute. Without a private copy, the deform
+     * would travel through the shared BufferGeometry into every other body on the page —
+     * the menu overlay's instance would ride the hero's scroll animation. Only the
+     * stretching instance pays the memory: everyone else keeps sharing the pristine cache.
+     */
+    if (enableStretch) {
+      cloned.traverse((child) => {
+        const mesh = child as Mesh;
+        if (mesh.isMesh) mesh.geometry = mesh.geometry.clone();
+      });
+    }
+
     return cloned;
-  }, [scene]);
+  }, [scene, enableStretch]);
 
   if (enableStretch) {
     return <BodyModelWithStretch model={model} />;

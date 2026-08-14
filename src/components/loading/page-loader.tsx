@@ -1,6 +1,7 @@
 "use client";
 
 import { useGSAP } from "@gsap/react";
+import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { LogoWordmark } from "@/components/layout/logo-wordmark";
 import { useLoading } from "@/components/loading/loading-provider";
@@ -104,6 +105,7 @@ function getFlyTransform(
 
 export function PageLoader() {
   const { logoTargetRef, completeLoading, revealNavItems } = useLoading();
+  const t = useTranslations("loader");
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<HTMLDivElement>(null);
@@ -230,7 +232,7 @@ export function PageLoader() {
       <div
         role="status"
         aria-busy="true"
-        aria-label="Loading"
+        aria-label={t("label")}
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
       >
         {/* Blends against the cream overlay behind it; the nav logo takes over on fade-out */}

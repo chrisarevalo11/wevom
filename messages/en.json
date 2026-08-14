@@ -1,0 +1,103 @@
+{
+  "site": {
+    "description": "Premium garments crafted for everyday excellence."
+  },
+  "nav": {
+    "menu": "MENU",
+    "close": "CLOSE",
+    "home": "Home",
+    "products": "Products",
+    "about": "About",
+    "instagram": "Instagram",
+    "main": "Main",
+    "cartLabel": "Cart, {count, plural, =0 {no items} one {# item} other {# items}}"
+  },
+  "locale": {
+    "label": "Language",
+    "es": "ES",
+    "en": "EN"
+  },
+  "loader": {
+    "label": "Loading"
+  },
+  "home": {
+    "manifesto": {
+      "line1": "Ǝ V O M proposes a universe in which the body is the central axis.",
+      "line2": "The body as an artistic manifesto.",
+      "line3": "The body as an entity of movement.",
+      "line4": "The body as the soul and vital principle of the garment."
+    },
+    "videoTitle": "Brand video",
+    "showcase": {
+      "eyebrow": "Latest collection",
+      "viewAll": "View all"
+    },
+    "aboutCta": "About EVOM"
+  },
+  "about": {
+    "meta": {
+      "title": "About",
+      "description": "Learn more about {brand} and our purpose."
+    },
+    "eyebrow": "About us",
+    "title": "Garments crafted with purpose",
+    "body1": "{brand} is a storefront built for a brand that wants full control over design, performance, and experience without sacrificing commerce reliability.",
+    "body2": "The catalog, inventory, and checkout run on Shopify, while the frontend delivers a fast, animated, search-friendly experience.",
+    "body3": "Every garment is selected and presented with care, reflecting our commitment to quality, transparency, and long-term value."
+  },
+  "products": {
+    "meta": {
+      "title": "Products",
+      "description": "Browse the full catalog."
+    },
+    "title": "Products",
+    "description": "Explore the full collection available in the store.",
+    "empty": "No products found in the store."
+  },
+  "product": {
+    "meta": {
+      "fallbackTitle": "Product",
+      "notFoundTitle": "Product not found"
+    },
+    "addToCart": "Add to cart",
+    "adding": "Adding..."
+  },
+  "cart": {
+    "meta": {
+      "title": "Cart",
+      "description": "Review your cart and continue to checkout."
+    },
+    "title": "Cart",
+    "drawerTitle": "Your cart",
+    "emptyTitle": "Your cart is empty",
+    "emptyBody": "Add garments to your cart to continue to checkout.",
+    "empty": "Your cart is empty.",
+    "loading": "Loading cart...",
+    "close": "Close",
+    "closeCart": "Close cart",
+    "continueShopping": "Continue shopping",
+    "viewCart": "View cart",
+    "orderSummary": "Order summary",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "checkout": "Proceed to checkout",
+    "checkoutNote": "You will be redirected to Shopify's secure checkout to complete your purchase.",
+    "quantity": "Qty {count}",
+    "increase": "Increase quantity",
+    "decrease": "Decrease quantity",
+    "remove": "Remove"
+  },
+  "notFound": {
+    "title": "seems you left the body.",
+    "backHome": "back"
+  },
+  "setupNotice": {
+    "title": "Shopify is not configured yet",
+    "body": "Add <code>SHOPIFY_STORE_DOMAIN</code> and <code>SHOPIFY_STOREFRONT_ACCESS_TOKEN</code> to your <code>.env</code> file. See <code>.env.example</code> for details.",
+    "cta": "View products page"
+  },
+  "comingSoon": {
+    "message": "You'll be able to shop online soon <3",
+    "close": "close"
+  }
+}

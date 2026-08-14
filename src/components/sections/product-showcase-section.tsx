@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { SHOWCASE_PRODUCTS } from "@/config/showcase-products";
 import { ShowcaseProductCard } from "@/features/products/showcase-product-card";
@@ -8,6 +9,7 @@ import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 
 export function ProductShowcaseSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const t = useTranslations("home.showcase");
 
   useGSAP(
     () => {
@@ -48,12 +50,12 @@ export function ProductShowcaseSection() {
     <section ref={sectionRef} className="bg-surface px-3 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <header className="mb-14 flex flex-col items-center justify-between gap-2 md:mb-20">
-            <p className="font-sans text-xs uppercase tracking-[0.24em] text-text-muted">
-              Última colección
-            </p>
-            <h2 className="font-wordmark text-xl font-medium uppercase tracking-[0.08em] text-text sm:text-xl">
-              DuraMadre
-            </h2>
+          <p className="font-sans text-xs uppercase tracking-[0.24em] text-text-muted">
+            {t("eyebrow")}
+          </p>
+          <h2 className="font-wordmark text-xl font-medium uppercase tracking-[0.08em] text-text sm:text-xl">
+            DuraMadre
+          </h2>
         </header>
 
         <div className="flex flex-col gap-14 md:grid md:grid-cols-12 md:gap-x-8 md:gap-y-0">
@@ -71,7 +73,10 @@ export function ProductShowcaseSection() {
             href="/products"
             className="font-sans text-xs uppercase tracking-[0.28em] text-text transition hover:opacity-60"
           >
-           {'✦'} Ver todo {'✦'}
+            {/* Same dot the footer marks its active link with */}
+            <span aria-hidden>·&nbsp;</span>
+            {t("viewAll")}
+            <span aria-hidden>&nbsp;·</span>
           </Link>
         </div>
       </div>

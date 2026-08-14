@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Price } from "@/components/ui/price";
 import type { ShopifyCartLine } from "@/lib/shopify";
 import { removeCartLineAction, updateCartLineAction } from "@/lib/shopify/actions";
@@ -10,6 +11,7 @@ import { useCartUiStore } from "@/stores/cart-ui-store";
 import { useCartQuery } from "./hooks/use-cart-query";
 
 function CartLineItem({ line }: { line: ShopifyCartLine }) {
+  const t = useTranslations("cart");
   const queryClient = useQueryClient();
   const setOptimisticCount = useCartUiStore((state) => state.setOptimisticCount);
 
@@ -70,6 +72,7 @@ function CartLineItem({ line }: { line: ShopifyCartLine }) {
             <button
               type="button"
               className="h-8 w-8 rounded-full border border-border"
+              aria-label={t("decrease")}
               onClick={() => updateMutation.mutate(Math.max(1, line.quantity - 1))}
               disabled={updateMutation.isPending}
             >
@@ -79,6 +82,7 @@ function CartLineItem({ line }: { line: ShopifyCartLine }) {
             <button
               type="button"
               className="h-8 w-8 rounded-full border border-border"
+              aria-label={t("increase")}
               onClick={() => updateMutation.mutate(line.quantity + 1)}
               disabled={updateMutation.isPending}
             >
@@ -99,7 +103,7 @@ function CartLineItem({ line }: { line: ShopifyCartLine }) {
           onClick={() => removeMutation.mutate()}
           disabled={removeMutation.isPending}
         >
-          Remove
+          {t("remove")}
         </button>
       </div>
     </div>
@@ -107,6 +111,7 @@ function CartLineItem({ line }: { line: ShopifyCartLine }) {
 }
 
 export function CartDrawer() {
+  const t = useTranslations("cart");
   const isOpen = useCartUiStore((state) => state.isOpen);
   const close = useCartUiStore((state) => state.close);
   const { data: cart, isLoading } = useCartQuery();
@@ -119,35 +124,35 @@ export function CartDrawer() {
         type="button"
         className="absolute inset-0 bg-black/40"
         onClick={close}
-        aria-label="Close cart"
+        aria-label={t("closeCart")}
       />
 
       <aside className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-surface shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold">Your cart</h2>
+          <h2 className="text-lg font-semibold">{t("drawerTitle")}</h2>
           <button
             type="button"
             onClick={close}
             className="rounded-full px-3 py-1 text-sm text-text-muted hover:bg-surface-muted"
           >
-            Close
+            {t("close")}
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6">
           {isLoading ? (
-            <p className="py-8 text-sm text-text-muted">Loading cart...</p>
+            <p className="py-8 text-sm text-text-muted">{t("loading")}</p>
           ) : cart && cart.lines.length > 0 ? (
             cart.lines.map((line) => <CartLineItem key={line.id} line={line} />)
           ) : (
-            <p className="py-8 text-sm text-text-muted">Your cart is empty.</p>
+            <p className="py-8 text-sm text-text-muted">{t("empty")}</p>
           )}
         </div>
 
         <div className="border-t border-border px-6 py-4">
           {cart ? (
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm text-text-muted">Subtotal</span>
+              <span className="text-sm text-text-muted">{t("subtotal")}</span>
               <Price
                 amount={cart.cost.subtotalAmount.amount}
                 currencyCode={cart.cost.subtotalAmount.currencyCode}
@@ -161,14 +166,14 @@ export function CartDrawer() {
               onClick={close}
               className="inline-flex w-full items-center justify-center rounded-full border border-border px-6 py-3 text-sm font-medium transition hover:bg-surface-muted"
             >
-              View cart
+              {t("viewCart")}
             </Link>
             {cart?.checkoutUrl ? (
               <a
                 href={cart.checkoutUrl}
                 className="inline-flex w-full items-center justify-center rounded-full bg-brand-accent px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
               >
-                Checkout
+                {t("checkout")}
               </a>
             ) : null}
           </div>

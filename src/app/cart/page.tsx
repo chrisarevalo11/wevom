@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Price } from "@/components/ui/price";
 import { ShopifySetupNotice } from "@/components/ui/shopify-setup-notice";
 import { isShopifyConfigured } from "@/env";
 import { getCartAction } from "@/lib/shopify/actions";
 
-export const metadata: Metadata = {
-  title: "Cart",
-  description: "Review your cart and proceed to checkout.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("cart.meta");
+
+  return { title: t("title"), description: t("description") };
+}
 
 export default async function CartPage() {
+  const t = await getTranslations("cart");
+
   if (!isShopifyConfigured()) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-24 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-semibold tracking-tight">Cart</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">{t("title")}</h1>
         <div className="mt-8">
           <ShopifySetupNotice />
         </div>
@@ -28,15 +32,13 @@ export default async function CartPage() {
   if (!cart || cart.lines.length === 0) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-semibold tracking-tight">Your cart is empty</h1>
-        <p className="mt-4 text-text-muted">
-          Add products to your cart to continue to checkout.
-        </p>
+        <h1 className="text-4xl font-semibold tracking-tight">{t("emptyTitle")}</h1>
+        <p className="mt-4 text-text-muted">{t("emptyBody")}</p>
         <Link
           href="/products"
           className="mt-8 inline-flex items-center rounded-full bg-brand px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
         >
-          Continue shopping
+          {t("continueShopping")}
         </Link>
       </div>
     );
@@ -44,7 +46,7 @@ export default async function CartPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-semibold tracking-tight">Cart</h1>
+      <h1 className="text-4xl font-semibold tracking-tight">{t("title")}</h1>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
         <div className="divide-y divide-border">
@@ -76,7 +78,9 @@ export default async function CartPage() {
                     <p className="text-sm text-text-muted">{line.merchandise.title}</p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-muted">Qty {line.quantity}</span>
+                    <span className="text-sm text-text-muted">
+                      {t("quantity", { count: line.quantity })}
+                    </span>
                     <Price
                       amount={(
                         Number.parseFloat(line.merchandise.price.amount) * line.quantity
@@ -91,17 +95,17 @@ export default async function CartPage() {
         </div>
 
         <aside className="h-fit rounded-2xl border border-border bg-surface-muted p-6">
-          <h2 className="text-lg font-medium">Order summary</h2>
+          <h2 className="text-lg font-medium">{t("orderSummary")}</h2>
           <div className="mt-6 space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-text-muted">Subtotal</span>
+              <span className="text-text-muted">{t("subtotal")}</span>
               <Price
                 amount={cart.cost.subtotalAmount.amount}
                 currencyCode={cart.cost.subtotalAmount.currencyCode}
               />
             </div>
             <div className="flex justify-between font-medium">
-              <span>Total</span>
+              <span>{t("total")}</span>
               <Price
                 amount={cart.cost.totalAmount.amount}
                 currencyCode={cart.cost.totalAmount.currencyCode}
@@ -113,13 +117,10 @@ export default async function CartPage() {
             href={cart.checkoutUrl}
             className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-brand-accent px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
           >
-            Proceed to checkout
+            {t("checkout")}
           </a>
 
-          <p className="mt-4 text-xs text-text-muted">
-            You will be redirected to Shopify&apos;s secure checkout to complete your
-            purchase.
-          </p>
+          <p className="mt-4 text-xs text-text-muted">{t("checkoutNote")}</p>
         </aside>
       </div>
     </div>

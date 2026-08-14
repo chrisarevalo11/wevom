@@ -1,18 +1,50 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { ReversedEText } from "@/components/ui/reversed-e-text";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 
-// TODO: replace with the final brand video asset (drop the file in /public/videos)
-// TODO: add a poster frame (a small webp/jpg still) — it paints instantly and hides the load
-const VIDEO_SRC = "/videos/brand-video.mp4";
-const VIDEO_POSTER: string | undefined = undefined;
+/**
+ * Transcoded from the 273 MB master (public/video/FINAL1.mov, gitignored) with the commands
+ * in public/video/README.md. Four renditions: AV1 where it's supported, H.264 everywhere
+ * else, at 720p on phones and 1080p above.
+ */
+const SOURCES = [
+  // AV1 first — roughly half the bytes of the H.264 fallback. The codecs string matters:
+  // Safari plays WebM but not AV1 inside it, and would otherwise pick this and fail.
+  {
+    src: "/video/brand-video-720.webm",
+    type: 'video/webm; codecs="av01.0.05M.08, opus"',
+    mobile: true,
+  },
+  {
+    src: "/video/brand-video-720.mp4",
+    type: 'video/mp4; codecs="avc1.4D401F, mp4a.40.2"',
+    mobile: true,
+  },
+  {
+    src: "/video/brand-video-1080.webm",
+    type: 'video/webm; codecs="av01.0.08M.08, opus"',
+    mobile: false,
+  },
+  {
+    src: "/video/brand-video-1080.mp4",
+    type: 'video/mp4; codecs="avc1.640028, mp4a.40.2"',
+    mobile: false,
+  },
+] as const;
+
+/** Phones get the 720p pair (12–18 MB) instead of the 1080p one (20–37 MB) */
+const MOBILE_MEDIA = "(max-width: 768px)";
+/** Paints instantly and hides the load (grabbed at 2s — the video fades up from black) */
+const VIDEO_POSTER = "/video/brand-video-poster.jpg";
 
 /** How early the video file starts downloading, ahead of entering the viewport */
 const PRELOAD_MARGIN = "600px";
 
-/** Scroll distance the six lines reveal over */
-const LINES_SCROLL_VH = 240;
+/** Scroll distance the lines reveal over — budgeted at ~40vh per line */
+const LINES_SCROLL_VH = 160;
 
 /**
  * Extra pinned scroll after the last line: breathing room, then the about image slides
@@ -22,19 +54,18 @@ const VIDEO_TAIL_VH = 140;
 
 /** Distance from the top while pinned — clears the 64px navbar with breathing room */
 
-const LINES = [
-  "Crafted with intention.",
-  "Designed to last.",
-  "Every stitch answers to the same standard.",
-  "Quality that goes beyond the surface.",
-  "No shortcuts, no compromises.",
-  "Made for the people who notice the difference.",
-] as const;
+/**
+ * Message keys under home.manifesto — the copy itself lives in messages/*.json, where the
+ * leading Ǝ marks the letter ReversedEText mirrors
+ */
+const LINE_KEYS = ["line1", "line2", "line3", "line4"] as const;
 
 export function VideoSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [shouldLoad, setShouldLoad] = useState(false);
+  const t = useTranslations("home.manifesto");
+  const tHome = useTranslations("home");
 
   // Nothing downloads until the section is nearly in view, so it costs the initial load nothing
   useEffect(() => {
@@ -60,17 +91,31 @@ export function VideoSection() {
     const video = videoRef.current;
     if (!video || !shouldLoad) return;
 
+    // <source> children were just added to an element that started with none — the element
+    // only picks them up on an explicit load()
+    video.load();
+
+    if (prefersReducedMotion()) return;
+
+    // Distinguishes our own offscreen pause from the user hitting pause in the controls,
+    // so scrolling back doesn't override their choice
+    let pausedByUs = false;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // Muted autoplay is the only kind browsers allow without a user gesture
-          video.play().catch(() => {});
-        } else {
+          if (video.paused && (pausedByUs || video.currentTime === 0)) {
+            pausedByUs = false;
+            // Muted autoplay is the only kind browsers allow without a user gesture
+            void video.play().catch(() => {});
+          }
+        } else if (!video.paused) {
           // Pausing offscreen keeps decode off the main thread while the page scrolls
+          pausedByUs = true;
           video.pause();
         }
       },
-      { threshold: 0.5 },
+      { threshold: 0.4 },
     );
 
     observer.observe(video);
@@ -138,37 +183,63 @@ export function VideoSection() {
 
   return (
     <section ref={sectionRef} className="bg-surface pt-20">
+      {/*
+       * Exactly one viewport tall. Mobile stacks — video on top, the copy dividing up what's
+       * left below it. From md the two sit side by side and the row is centred vertically:
+       * video flush to the left edge at 70vw, manifesto in the remaining 30vw.
+       */}
       <div
-        className="flex flex-col items-center"
+        className="flex h-dvh flex-col items-center md:flex-row md:items-center"
         style={{ position: "sticky", top: 0 }}
       >
         <div
           data-video-frame
-          className="relative aspect-video max-h-[40vh] w-full overflow-hidden bg-surface-muted"
+          className="relative aspect-video max-h-[40vh] w-full overflow-hidden bg-surface-muted md:max-h-none md:w-[70vw] md:shrink-0"
         >
           <video
             ref={videoRef}
-            src={shouldLoad ? VIDEO_SRC : undefined}
             poster={VIDEO_POSTER}
-            title="Brand video"
+            title={tHome("videoTitle")}
             controls
+            // Autoplay is only permitted while muted; the renditions do carry an audio
+            // track, so viewers can unmute from the controls
             muted
             loop
             playsInline
             disableRemotePlayback
             preload="none"
             className="absolute inset-0 h-full w-full object-cover"
-          />
+          >
+            {/* Sources only mount once the section is close, so the initial load pays nothing */}
+            {shouldLoad
+              ? SOURCES.map((source) => (
+                  <source
+                    key={source.src}
+                    src={source.src}
+                    type={source.type}
+                    media={source.mobile ? MOBILE_MEDIA : undefined}
+                  />
+                ))
+              : null}
+          </video>
         </div>
 
-        <div className="mx-auto mt-8 flex max-w-2xl flex-col gap-4 px-3 sm:px-6 lg:px-8">
-          {LINES.map((line) => (
+        {/*
+         * Mobile: flex-1 claims everything the video leaves, and space-evenly splits it into
+         * five equal gaps — video → line 1, between each line, and line 4 → the viewport
+         * bottom where the next section arrives. No fixed margins, so it holds at any height.
+         *
+         * Desktop: the same flex-1 becomes the 30vw column beside the video, its own height
+         * capped so the lines group as a block instead of spanning the full viewport.
+         */}
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-evenly px-3 sm:px-6 lg:px-8 md:mx-0 md:h-auto md:max-h-[60vh] md:min-w-0 md:max-w-none md:flex-1 md:gap-8 md:justify-center md:px-8 lg:px-10">
+          {LINE_KEYS.map((key) => (
             <p
-              key={line}
+              key={key}
               data-video-line
-              className="text-center text-sm leading-relaxed text-text-muted sm:text-base"
+              className="text-center text-base leading-relaxed text-text-muted sm:text-lg md:text-left md:text-sm lg:text-base"
             >
-              {line}
+              <ReversedEText text={t(key)} />
             </p>
           ))}
         </div>

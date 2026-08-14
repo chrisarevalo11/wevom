@@ -1,0 +1,103 @@
+{
+  "site": {
+    "description": "Prendas premium hechas para la excelencia cotidiana."
+  },
+  "nav": {
+    "menu": "MENU",
+    "close": "CERRAR",
+    "home": "Inicio",
+    "products": "Productos",
+    "about": "Nosotros",
+    "instagram": "Instagram",
+    "main": "Principal",
+    "cartLabel": "Carrito, {count, plural, =0 {sin artículos} one {# artículo} other {# artículos}}"
+  },
+  "locale": {
+    "label": "Idioma",
+    "es": "ES",
+    "en": "EN"
+  },
+  "loader": {
+    "label": "Cargando"
+  },
+  "home": {
+    "manifesto": {
+      "line1": "Ǝ V O M es la propuesta de un universo en el que el cuerpo es el eje principal.",
+      "line2": "Ǝl cuerpo como manifiesto artístico.",
+      "line3": "Ǝl cuerpo como ente de movimiento.",
+      "line4": "Ǝl cuerpo como alma y principio vital de la prenda."
+    },
+    "videoTitle": "Video de marca",
+    "showcase": {
+      "eyebrow": "Última colección",
+      "viewAll": "Ver todo"
+    },
+    "aboutCta": "Sobre EVOM"
+  },
+  "about": {
+    "meta": {
+      "title": "Nosotros",
+      "description": "Conoce más sobre {brand} y nuestro propósito."
+    },
+    "eyebrow": "Nosotros",
+    "title": "Prendas creadas con propósito",
+    "body1": "{brand} es una tienda construida para una marca que quiere control total sobre diseño, rendimiento y experiencia, sin sacrificar la fiabilidad del comercio.",
+    "body2": "El catálogo, el inventario y el pago funcionan sobre Shopify, mientras el frontend entrega una experiencia rápida, animada y optimizada para buscadores.",
+    "body3": "Cada prenda se elige y se presenta con cuidado, reflejando nuestro compromiso con la calidad, la transparencia y el valor a largo plazo."
+  },
+  "products": {
+    "meta": {
+      "title": "Productos",
+      "description": "Explora el catálogo completo."
+    },
+    "title": "Productos",
+    "description": "Explora la colección completa disponible en la tienda.",
+    "empty": "No se encontraron productos en la tienda."
+  },
+  "product": {
+    "meta": {
+      "fallbackTitle": "Producto",
+      "notFoundTitle": "Producto no encontrado"
+    },
+    "addToCart": "Añadir al carrito",
+    "adding": "Añadiendo..."
+  },
+  "cart": {
+    "meta": {
+      "title": "Carrito",
+      "description": "Revisa tu carrito y continúa al pago."
+    },
+    "title": "Carrito",
+    "drawerTitle": "Tu carrito",
+    "emptyTitle": "Tu carrito está vacío",
+    "emptyBody": "Añade prendas a tu carrito para continuar al pago.",
+    "empty": "Tu carrito está vacío.",
+    "loading": "Cargando carrito...",
+    "close": "Cerrar",
+    "closeCart": "Cerrar carrito",
+    "continueShopping": "Seguir comprando",
+    "viewCart": "Ver carrito",
+    "orderSummary": "Resumen del pedido",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "checkout": "Ir al pago",
+    "checkoutNote": "Te redirigiremos al pago seguro de Shopify para completar tu compra.",
+    "quantity": "Cant. {count}",
+    "increase": "Aumentar cantidad",
+    "decrease": "Reducir cantidad",
+    "remove": "Eliminar"
+  },
+  "notFound": {
+    "title": "parece saliste del cuerpo.",
+    "backHome": "volver"
+  },
+  "setupNotice": {
+    "title": "Shopify aún no está configurado",
+    "body": "Añade <code>SHOPIFY_STORE_DOMAIN</code> y <code>SHOPIFY_STOREFRONT_ACCESS_TOKEN</code> a tu archivo <code>.env</code>. Consulta <code>.env.example</code> para más detalles.",
+    "cta": "Ver página de productos"
+  },
+  "comingSoon": {
+    "message": "Pronto podras comprar en la tienda virtual <3",
+    "close": "cerrar"
+  }
+}

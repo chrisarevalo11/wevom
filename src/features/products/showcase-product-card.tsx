@@ -1,7 +1,9 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
 import type { ShowcaseProduct } from "@/config/showcase-products";
 import { cn } from "@/lib/utils/cn";
+import { useComingSoonStore } from "@/stores/coming-soon-store";
 
 type ShowcaseProductCardProps = {
   product: ShowcaseProduct;
@@ -9,9 +11,19 @@ type ShowcaseProductCardProps = {
 };
 
 export function ShowcaseProductCard({ product, className }: ShowcaseProductCardProps) {
+  const openComingSoon = useComingSoonStore((state) => state.open);
+
   return (
     <article data-showcase-card className={cn("flex flex-col", className)}>
-      <Link href={product.href} className="group flex flex-col gap-3">
+      {/*
+       * A button rather than a link to the product page: nothing can be bought yet, so the
+       * card raises the "coming soon" modal instead of navigating.
+       */}
+      <button
+        type="button"
+        onClick={openComingSoon}
+        className="group flex flex-col gap-3 text-left cursor-pointer"
+      >
         <div
           className={cn(
             "relative w-full overflow-hidden bg-surface-muted",
@@ -34,7 +46,7 @@ export function ShowcaseProductCard({ product, className }: ShowcaseProductCardP
             {product.price}
           </p>
         </div>
-      </Link>
+      </button>
     </article>
   );
 }

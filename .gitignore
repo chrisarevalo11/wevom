@@ -42,3 +42,6 @@ build
 
 # Biome
 .biome-cache
+
+# Video masters — never ship the source cuts (see public/video/README.md)
+public/video/*.mov

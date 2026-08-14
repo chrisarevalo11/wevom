@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ShopifySetupNotice } from "@/components/ui/shopify-setup-notice";
 import { getSiteUrl, isShopifyConfigured } from "@/env";
 import {
@@ -15,15 +16,15 @@ type ProductPageProps = {
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
-  const { handle } = await params;
+  const [{ handle }, t] = await Promise.all([params, getTranslations("product.meta")]);
 
   if (!isShopifyConfigured()) {
-    return { title: "Product" };
+    return { title: t("fallbackTitle") };
   }
 
   try {
     const product = await getProductByHandle(handle);
-    if (!product) return { title: "Product not found" };
+    if (!product) return { title: t("notFoundTitle") };
 
     return {
       title: product.title,
@@ -36,7 +37,7 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: "Product" };
+    return { title: t("fallbackTitle") };
   }
 }
 
