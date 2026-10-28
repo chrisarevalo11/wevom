@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl, isShopifyConfigured } from "@/env";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { getProducts } from "@/lib/shopify";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -14,12 +15,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     // /about is disabled until the page is ready, so it stays out of the sitemap
-    {
-      url: `${siteUrl}/cart`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.3,
-    },
   ];
 
   if (!isShopifyConfigured()) {
@@ -27,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    const { products } = await getProducts(100);
+    const { products } = await getProducts({ first: 100, locale: DEFAULT_LOCALE });
     const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
       url: `${siteUrl}/products/${product.handle}`,
       lastModified: new Date(),

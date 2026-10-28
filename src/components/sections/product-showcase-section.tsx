@@ -3,11 +3,22 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
-import { SHOWCASE_PRODUCTS } from "@/config/showcase-products";
-import { ShowcaseProductCard } from "@/features/products/showcase-product-card";
-import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { TEXT_LINK_CLASS } from "@/components/ui/text-link";
+import { SHOWCASE_SLOTS } from "@/config/catalog-layout";
+import {
+  type ProductCardItem,
+  ProductMediaCard,
+} from "@/features/products/product-media-card";
+import { gsap, useGSAP } from "@/lib/gsap";
+import { revealOnScroll } from "@/lib/reveal-on-scroll";
+import { cn } from "@/lib/utils/cn";
 
-export function ProductShowcaseSection() {
+type ProductShowcaseSectionProps = {
+  /** At most `SHOWCASE_SLOTS.length` — the composition has a fixed number of places */
+  items: ProductCardItem[];
+};
+
+export function ProductShowcaseSection({ items }: ProductShowcaseSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const t = useTranslations("home.showcase");
 
@@ -16,39 +27,25 @@ export function ProductShowcaseSection() {
       const section = sectionRef.current;
       if (!section) return;
 
-      const cards = gsap.utils.toArray<HTMLElement>("[data-showcase-card]", section);
-      if (cards.length === 0) return;
-
-      if (prefersReducedMotion()) {
-        gsap.set(cards, { autoAlpha: 1 });
-        return;
-      }
-
-      // One trigger per card so each fades on its own visibility, not the grid's
-      for (const card of cards) {
-        gsap.fromTo(
-          card,
-          { autoAlpha: 0 },
-          {
-            autoAlpha: 1,
-            duration: 0.9,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 70%",
-              // Reverses on scroll-up once the card leaves the viewport again
-              toggleActions: "play none none reverse",
-            },
-          },
-        );
-      }
+      // Every card plus the "view all" link at the foot of the grid — they all reveal the
+      // same way, each on its own position
+      revealOnScroll(
+        gsap.utils.toArray<HTMLElement>(
+          "[data-product-card], [data-showcase-reveal]",
+          section,
+        ),
+      );
     },
     { scope: sectionRef },
   );
 
   return (
-    <section ref={sectionRef} className="bg-surface px-3 py-20 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <section
+      ref={sectionRef}
+      className="bg-surface px-3 py-20 sm:px-6 lg:px-10 xl:px-14"
+    >
+      {/* No max-width on desktop: the scattered grid is meant to span the full viewport */}
+      <div className="mx-auto max-w-7xl md:max-w-none">
         <header className="mb-14 flex flex-col items-center justify-between gap-2 md:mb-20">
           <p className="font-sans text-xs uppercase tracking-[0.24em] text-text-muted">
             {t("eyebrow")}
@@ -58,20 +55,27 @@ export function ProductShowcaseSection() {
           </h2>
         </header>
 
-        <div className="flex flex-col gap-14 md:grid md:grid-cols-12 md:gap-x-8 md:gap-y-0">
-          {SHOWCASE_PRODUCTS.map((product) => (
-            <ShowcaseProductCard
-              key={product.id}
-              product={product}
-              className={`${product.mobileClass} ${product.desktopClass}`}
-            />
-          ))}
+        <div className="flex flex-col gap-14 md:grid md:grid-cols-12 md:gap-x-8 md:gap-y-0 lg:gap-x-10">
+          {items.slice(0, SHOWCASE_SLOTS.length).map((item, index) => {
+            const slot = SHOWCASE_SLOTS[index];
+            return (
+              <ProductMediaCard
+                key={item.id}
+                item={item}
+                aspect={slot.aspect}
+                className={`${slot.mobile} ${slot.desktop}`}
+              />
+            );
+          })}
         </div>
 
-        <div className="mt-20 flex flex-col items-center gap-3 md:mt-28">
+        <div
+          data-showcase-reveal
+          className="mt-20 flex flex-col items-center gap-3 md:mt-28"
+        >
           <Link
             href="/products"
-            className="font-sans text-xs uppercase tracking-[0.28em] text-text transition hover:opacity-60"
+            className={cn(TEXT_LINK_CLASS, "text-text hover:opacity-60")}
           >
             {/* Same dot the footer marks its active link with */}
             <span aria-hidden>·&nbsp;</span>

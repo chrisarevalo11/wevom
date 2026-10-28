@@ -1,27 +1,32 @@
 export const getProductsQuery = `#graphql
-  query GetProducts($first: Int!, $after: String) {
-    products(first: $first, after: $after) {
+  query GetProducts(
+    $first: Int!
+    $after: String
+    $language: LanguageCode
+    $country: CountryCode
+  ) @inContext(language: $language, country: $country) {
+    products(first: $first, after: $after, sortKey: CREATED_AT, reverse: true) {
       pageInfo {
         hasNextPage
         endCursor
       }
-      edges {
-        node {
-          id
-          title
-          handle
-          description
-          featuredImage {
+      nodes {
+        id
+        title
+        handle
+        productType
+        images(first: 2) {
+          nodes {
             url
             altText
             width
             height
           }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
+        }
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
           }
         }
       }
@@ -30,11 +35,16 @@ export const getProductsQuery = `#graphql
 `;
 
 export const getProductByHandleQuery = `#graphql
-  query GetProductByHandle($handle: String!) {
+  query GetProductByHandle(
+    $handle: String!
+    $language: LanguageCode
+    $country: CountryCode
+  ) @inContext(language: $language, country: $country) {
     product(handle: $handle) {
       id
       title
       handle
+      productType
       description
       descriptionHtml
       featuredImage {
@@ -44,39 +54,38 @@ export const getProductByHandleQuery = `#graphql
         height
       }
       images(first: 8) {
-        edges {
-          node {
-            url
-            altText
-            width
-            height
-          }
+        nodes {
+          url
+          altText
+          width
+          height
         }
       }
       options {
         name
-        values
+        optionValues {
+          name
+        }
       }
       variants(first: 50) {
-        edges {
-          node {
-            id
-            title
-            availableForSale
-            selectedOptions {
-              name
-              value
-            }
-            price {
-              amount
-              currencyCode
-            }
-            image {
-              url
-              altText
-              width
-              height
-            }
+        nodes {
+          id
+          title
+          availableForSale
+          quantityAvailable
+          selectedOptions {
+            name
+            value
+          }
+          price {
+            amount
+            currencyCode
+          }
+          image {
+            url
+            altText
+            width
+            height
           }
         }
       }
@@ -115,6 +124,7 @@ export const getCartQuery = `#graphql
               ... on ProductVariant {
                 id
                 title
+                quantityAvailable
                 product {
                   title
                   handle
@@ -134,6 +144,18 @@ export const getCartQuery = `#graphql
               }
             }
           }
+        }
+      }
+    }
+  }
+`;
+
+export const getCartDeliveryAddressesQuery = `#graphql
+  query GetCartDeliveryAddresses($cartId: ID!) {
+    cart(id: $cartId) {
+      delivery {
+        addresses {
+          id
         }
       }
     }

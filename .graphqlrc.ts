@@ -8,6 +8,8 @@ export default {
       apiType: ApiType.Storefront,
       apiVersion: "2026-01",
       outputDir: "./types",
+      // String unions instead of TS enums: enums in a .d.ts have no runtime value to pass
+      enumsAsConst: true,
     }),
   },
 };

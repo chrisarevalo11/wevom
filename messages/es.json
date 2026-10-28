@@ -10,6 +10,7 @@
     "about": "Nosotros",
     "instagram": "Instagram",
     "main": "Principal",
+    "footer": "Pie de página",
     "cartLabel": "Carrito, {count, plural, =0 {sin artículos} one {# artículo} other {# artículos}}"
   },
   "locale": {
@@ -32,7 +33,7 @@
       "eyebrow": "Última colección",
       "viewAll": "Ver todo"
     },
-    "aboutCta": "Sobre EVOM"
+    "aboutCta": "Sobre ƎVOM"
   },
   "about": {
     "meta": {
@@ -50,9 +51,16 @@
       "title": "Productos",
       "description": "Explora el catálogo completo."
     },
-    "title": "Productos",
-    "description": "Explora la colección completa disponible en la tienda.",
-    "empty": "No se encontraron productos en la tienda."
+    "categories": {
+      "label": "Categorías de productos",
+      "all": "Todo",
+      "jackets": "Chaquetas",
+      "tops": "Tops",
+      "pants": "Pantalones",
+      "skirtsDresses": "Faldas/Vestidos",
+      "accessories": "Accesorios"
+    },
+    "empty": "Aún no hay productos en esta categoría."
   },
   "product": {
     "meta": {
@@ -60,32 +68,31 @@
       "notFoundTitle": "Producto no encontrado"
     },
     "addToCart": "Añadir al carrito",
-    "adding": "Añadiendo..."
+    "adding": "Añadiendo...",
+    "care": "Cuidados",
+    "decrease": "Disminuir cantidad",
+    "increase": "Aumentar cantidad",
+    "closeImage": "Cerrar",
+    "sample": {
+      "description": "Confeccionada en Bogotá, en una serie limitada.",
+      "composition": "100% algodón · forro en deadstock",
+      "care": "Lavar a mano en frío. Secar en plano, lejos del sol directo. No usar blanqueador ni secadora."
+    },
+    "soldOut": "Agotado",
+    "oneSize": "Talla única"
   },
   "cart": {
-    "meta": {
-      "title": "Carrito",
-      "description": "Revisa tu carrito y continúa al pago."
-    },
-    "title": "Carrito",
     "drawerTitle": "Tu carrito",
-    "emptyTitle": "Tu carrito está vacío",
-    "emptyBody": "Añade prendas a tu carrito para continuar al pago.",
     "empty": "Tu carrito está vacío.",
     "loading": "Cargando carrito...",
-    "close": "Cerrar",
     "closeCart": "Cerrar carrito",
-    "continueShopping": "Seguir comprando",
-    "viewCart": "Ver carrito",
-    "orderSummary": "Resumen del pedido",
     "subtotal": "Subtotal",
-    "total": "Total",
     "checkout": "Ir al pago",
-    "checkoutNote": "Te redirigiremos al pago seguro de Shopify para completar tu compra.",
-    "quantity": "Cant. {count}",
     "increase": "Aumentar cantidad",
     "decrease": "Reducir cantidad",
-    "remove": "Eliminar"
+    "remove": "Eliminar",
+    "soldOut": "Agotado",
+    "oneSize": "Talla única"
   },
   "notFound": {
     "title": "parece saliste del cuerpo.",
@@ -99,5 +106,42 @@
   "comingSoon": {
     "message": "Pronto podras comprar en la tienda virtual <3",
     "close": "cerrar"
+  },
+  "summary": {
+    "meta": {
+      "title": "Resumen",
+      "description": "Revisa tu pedido y tus datos de envío antes de pagar."
+    },
+    "loading": "Cargando carrito...",
+    "empty": "Tu carrito está vacío.",
+    "browse": "Ver productos",
+    "subtotal": "Subtotal",
+    "shippingNote": "El envío se calcula en el pago, según la dirección.",
+    "continue": "Continuar",
+    "steps": {
+      "items": "Productos",
+      "shipping": "Envío"
+    },
+    "shipping": {
+      "contact": "Contacto",
+      "address": "Dirección de envío",
+      "selectDepartment": "Selecciona un departamento",
+      "back": "Volver",
+      "submit": "Ir al pago",
+      "redirecting": "Redirigiendo...",
+      "error": "No pudimos guardar tus datos. Inténtalo de nuevo.",
+      "fields": {
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "address1": "Dirección",
+        "address2": "Apartamento, torre, etc. (opcional)",
+        "city": "Ciudad",
+        "provinceCode": "Departamento",
+        "zip": "Código postal (opcional)",
+        "country": "País"
+      }
+    }
   }
 }

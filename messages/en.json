@@ -10,6 +10,7 @@
     "about": "About",
     "instagram": "Instagram",
     "main": "Main",
+    "footer": "Footer",
     "cartLabel": "Cart, {count, plural, =0 {no items} one {# item} other {# items}}"
   },
   "locale": {
@@ -32,7 +33,7 @@
       "eyebrow": "Latest collection",
       "viewAll": "View all"
     },
-    "aboutCta": "About EVOM"
+    "aboutCta": "About ƎVOM"
   },
   "about": {
     "meta": {
@@ -50,9 +51,16 @@
       "title": "Products",
       "description": "Browse the full catalog."
     },
-    "title": "Products",
-    "description": "Explore the full collection available in the store.",
-    "empty": "No products found in the store."
+    "categories": {
+      "label": "Product categories",
+      "all": "All",
+      "jackets": "Jackets",
+      "tops": "Tops",
+      "pants": "Pants",
+      "skirtsDresses": "Skirts/Dresses",
+      "accessories": "Accessories"
+    },
+    "empty": "No products in this category yet."
   },
   "product": {
     "meta": {
@@ -60,32 +68,31 @@
       "notFoundTitle": "Product not found"
     },
     "addToCart": "Add to cart",
-    "adding": "Adding..."
+    "adding": "Adding...",
+    "care": "Care",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "closeImage": "Close",
+    "sample": {
+      "description": "Cut and sewn in Bogotá, in a limited run.",
+      "composition": "100% cotton · deadstock lining",
+      "care": "Hand wash cold. Dry flat, away from direct sun. Do not bleach or tumble dry."
+    },
+    "soldOut": "Sold out",
+    "oneSize": "One size"
   },
   "cart": {
-    "meta": {
-      "title": "Cart",
-      "description": "Review your cart and continue to checkout."
-    },
-    "title": "Cart",
     "drawerTitle": "Your cart",
-    "emptyTitle": "Your cart is empty",
-    "emptyBody": "Add garments to your cart to continue to checkout.",
     "empty": "Your cart is empty.",
     "loading": "Loading cart...",
-    "close": "Close",
     "closeCart": "Close cart",
-    "continueShopping": "Continue shopping",
-    "viewCart": "View cart",
-    "orderSummary": "Order summary",
     "subtotal": "Subtotal",
-    "total": "Total",
     "checkout": "Proceed to checkout",
-    "checkoutNote": "You will be redirected to Shopify's secure checkout to complete your purchase.",
-    "quantity": "Qty {count}",
     "increase": "Increase quantity",
     "decrease": "Decrease quantity",
-    "remove": "Remove"
+    "remove": "Remove",
+    "soldOut": "Sold out",
+    "oneSize": "One size"
   },
   "notFound": {
     "title": "seems you left the body.",
@@ -99,5 +106,42 @@
   "comingSoon": {
     "message": "You'll be able to shop online soon <3",
     "close": "close"
+  },
+  "summary": {
+    "meta": {
+      "title": "Summary",
+      "description": "Review your order and shipping details before paying."
+    },
+    "loading": "Loading cart...",
+    "empty": "Your cart is empty.",
+    "browse": "Browse products",
+    "subtotal": "Subtotal",
+    "shippingNote": "Shipping is calculated at checkout from your address.",
+    "continue": "Continue",
+    "steps": {
+      "items": "Items",
+      "shipping": "Shipping"
+    },
+    "shipping": {
+      "contact": "Contact",
+      "address": "Shipping address",
+      "selectDepartment": "Select a department",
+      "back": "Back",
+      "submit": "Go to payment",
+      "redirecting": "Redirecting...",
+      "error": "We could not save your details. Please try again.",
+      "fields": {
+        "email": "Email",
+        "phone": "Phone",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "address1": "Address",
+        "address2": "Apartment, tower, etc. (optional)",
+        "city": "City",
+        "provinceCode": "Department",
+        "zip": "Postal code (optional)",
+        "country": "Country"
+      }
+    }
   }
 }
