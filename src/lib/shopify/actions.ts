@@ -7,13 +7,46 @@ import { isShopifyConfigured } from "@/env";
 import { getShopifyClient } from "./client";
 import { getCart, type ShopifyCart } from "./index";
 import {
+  cartBuyerIdentityUpdateMutation,
   cartCreateMutation,
+  cartDeliveryAddressesAddMutation,
+  cartDeliveryAddressesRemoveMutation,
   cartLinesAddMutation,
   cartLinesRemoveMutation,
   cartLinesUpdateMutation,
 } from "./mutations";
+import { getCartDeliveryAddressesQuery } from "./queries";
 
 const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+
+/**
+ * Shopify never refuses an out-of-stock line: it adds it at quantity 0 and reports a warning.
+ * A zero line is useless to the visitor, so the add is treated as failed and the line removed.
+ */
+const OUT_OF_STOCK = "MERCHANDISE_OUT_OF_STOCK";
+
+type CartWarning = { code: string; message: string };
+
+async function dropZeroLines(cartId: string) {
+  const cart = await getCart(cartId);
+  const lineIds = cart?.lines
+    .filter((line) => line.quantity === 0)
+    .map((line) => line.id);
+  if (!lineIds || lineIds.length === 0) return;
+  await getShopifyClient().request(cartLinesRemoveMutation, {
+    variables: { cartId, lineIds },
+  });
+}
+
+async function rejectOutOfStock(
+  cartId: string,
+  warnings: CartWarning[] | undefined,
+): Promise<string | undefined> {
+  const warning = warnings?.find((entry) => entry.code === OUT_OF_STOCK);
+  if (!warning) return undefined;
+  await dropZeroLines(cartId);
+  return warning.message;
+}
 
 async function persistCartId(cartId: string) {
   const cookieStore = await cookies();
@@ -32,7 +65,7 @@ async function getCartIdFromCookie(): Promise<string | undefined> {
 }
 
 function revalidateCartPaths() {
-  revalidatePath("/cart");
+  // The cart only renders in the drawer, which lives in the root layout
   revalidatePath("/", "layout");
 }
 
@@ -78,6 +111,10 @@ export async function addToCartAction(
 
       await persistCartId(newCartId);
       revalidateCartPaths();
+
+      const outOfStock = await rejectOutOfStock(newCartId, data?.cartCreate?.warnings);
+      if (outOfStock) return { cart: await getCart(newCartId), error: outOfStock };
+
       return { cart: await getCart(newCartId) };
     }
 
@@ -98,6 +135,10 @@ export async function addToCartAction(
     }
 
     revalidateCartPaths();
+
+    const outOfStock = await rejectOutOfStock(cartId, data?.cartLinesAdd?.warnings);
+    if (outOfStock) return { cart: await getCart(cartId), error: outOfStock };
+
     return { cart: await getCart(cartId) };
   } catch (error) {
     return {
@@ -184,6 +225,110 @@ export async function removeCartLineAction(
     return {
       cart: null,
       error: error instanceof Error ? error.message : "Failed to remove item",
+    };
+  }
+}
+
+export type ShippingDetails = {
+  email: string;
+  phone: string;
+  firstName: string;
+  lastName: string;
+  address1: string;
+  address2: string;
+  city: string;
+  provinceCode: string;
+  zip: string;
+};
+
+/** The shop ships inside Colombia only, so the address never carries another country */
+const SHIPPING_COUNTRY = "CO";
+
+/**
+ * Stores the visitor's contact and delivery address on the cart so Shopify's checkout opens
+ * with them already filled in. Shipping rates and payment stay on Shopify: the Storefront API
+ * cannot take a payment, and rates depend on the address Shopify validates at checkout.
+ *
+ * The cart keeps one selected address: any address stored by an earlier visit is removed
+ * first, so re-submitting the form replaces it instead of piling up alternatives.
+ */
+export async function setShippingDetailsAction(
+  details: ShippingDetails,
+): Promise<{ checkoutUrl: string | null; error?: string }> {
+  if (!isShopifyConfigured()) {
+    return { checkoutUrl: null, error: "Shopify is not configured." };
+  }
+
+  const cartId = await getCartIdFromCookie();
+  if (!cartId) {
+    return { checkoutUrl: null, error: "Cart not found." };
+  }
+
+  try {
+    const client = getShopifyClient();
+
+    const identity = await client.request(cartBuyerIdentityUpdateMutation, {
+      variables: {
+        cartId,
+        buyerIdentity: {
+          email: details.email,
+          phone: details.phone || undefined,
+          countryCode: SHIPPING_COUNTRY,
+        },
+      },
+    });
+    const identityError =
+      identity.errors?.message ??
+      identity.data?.cartBuyerIdentityUpdate?.userErrors?.[0]?.message;
+    if (identityError) return { checkoutUrl: null, error: identityError };
+
+    const existing = await client.request(getCartDeliveryAddressesQuery, {
+      variables: { cartId },
+    });
+    const addressIds =
+      existing.data?.cart?.delivery?.addresses.map((entry) => entry.id) ?? [];
+    if (addressIds.length > 0) {
+      await client.request(cartDeliveryAddressesRemoveMutation, {
+        variables: { cartId, addressIds },
+      });
+    }
+
+    const added = await client.request(cartDeliveryAddressesAddMutation, {
+      variables: {
+        cartId,
+        addresses: [
+          {
+            selected: true,
+            address: {
+              deliveryAddress: {
+                firstName: details.firstName,
+                lastName: details.lastName,
+                address1: details.address1,
+                address2: details.address2 || undefined,
+                city: details.city,
+                provinceCode: details.provinceCode,
+                zip: details.zip || undefined,
+                phone: details.phone || undefined,
+                countryCode: SHIPPING_COUNTRY,
+              },
+            },
+          },
+        ],
+      },
+    });
+    const addError =
+      added.errors?.message ??
+      added.data?.cartDeliveryAddressesAdd?.userErrors?.[0]?.message;
+    if (addError) return { checkoutUrl: null, error: addError };
+
+    revalidateCartPaths();
+    return {
+      checkoutUrl: added.data?.cartDeliveryAddressesAdd?.cart?.checkoutUrl ?? null,
+    };
+  } catch (error) {
+    return {
+      checkoutUrl: null,
+      error: error instanceof Error ? error.message : "Failed to save shipping details",
     };
   }
 }

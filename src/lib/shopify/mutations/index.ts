@@ -10,6 +10,10 @@ export const cartCreateMutation = `#graphql
         field
         message
       }
+      warnings {
+        code
+        message
+      }
     }
   }
 `;
@@ -24,6 +28,10 @@ export const cartLinesAddMutation = `#graphql
       }
       userErrors {
         field
+        message
+      }
+      warnings {
+        code
         message
       }
     }
@@ -53,6 +61,50 @@ export const cartLinesRemoveMutation = `#graphql
         id
         checkoutUrl
         totalQuantity
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+export const cartBuyerIdentityUpdateMutation = `#graphql
+  mutation CartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+    cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+      cart {
+        id
+        checkoutUrl
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+export const cartDeliveryAddressesAddMutation = `#graphql
+  mutation CartDeliveryAddressesAdd($cartId: ID!, $addresses: [CartSelectableAddressInput!]!) {
+    cartDeliveryAddressesAdd(cartId: $cartId, addresses: $addresses) {
+      cart {
+        id
+        checkoutUrl
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+export const cartDeliveryAddressesRemoveMutation = `#graphql
+  mutation CartDeliveryAddressesRemove($cartId: ID!, $addressIds: [ID!]!) {
+    cartDeliveryAddressesRemove(cartId: $cartId, addressIds: $addressIds) {
+      cart {
+        id
       }
       userErrors {
         field
