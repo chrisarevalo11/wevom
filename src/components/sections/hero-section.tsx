@@ -1,3 +1,4 @@
+import { HeroScrollFade } from "@/components/layout/hero-scroll-fade";
 import { LocaleSwitch } from "@/components/layout/locale-switch";
 import { LOCALE_SWITCH_TOP } from "@/config/layout";
 
@@ -8,10 +9,13 @@ export function HeroSection() {
        * Sticky rather than fixed: it holds under the body's feet for the whole hero runway,
        * then scrolls away with the section as the showcase arrives. Sticky shifts the box
        * down to the offset on its own, so no absolute positioning or spacer is needed.
+       *
+       * Fades on scroll alongside the body so both are gone before the showcase edge
+       * reaches them, instead of being cut off by it.
        */}
-      <div className={`sticky ${LOCALE_SWITCH_TOP} flex justify-center`}>
+      <HeroScrollFade className={`sticky ${LOCALE_SWITCH_TOP} flex justify-center`}>
         <LocaleSwitch />
-      </div>
+      </HeroScrollFade>
     </section>
   );
 }

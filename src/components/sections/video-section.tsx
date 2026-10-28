@@ -47,12 +47,24 @@ const PRELOAD_MARGIN = "600px";
 const LINES_SCROLL_VH = 160;
 
 /**
- * Extra pinned scroll after the last line: breathing room, then the about image slides
- * across. Keep the overlap portion in sync with OVERLAP in about-image-section.tsx.
+ * Extra pinned scroll after the last line: breathing room, the fade, then a 20vh beat of
+ * empty screen before the about image slides across. The trailing 100vh is what the image
+ * travels over — keep that portion in sync with OVERLAP in about-image-section.tsx.
  */
-const VIDEO_TAIL_VH = 140;
+const VIDEO_TAIL_VH = 160;
 
-/** Distance from the top while pinned — clears the 64px navbar with breathing room */
+/**
+ * Quiet scroll after the last line lands, before the section starts fading. Small on
+ * purpose: it is a beat, not a pause.
+ */
+const FADE_DELAY_PX = 200;
+
+/**
+ * Scroll the fade itself spans. Has to finish inside the tail: the about plate's top edge
+ * reaches the viewport ~40vh after the fade starts, and the point is that nothing visible
+ * is left for it to cut across.
+ */
+const FADE_SCROLL_VH = 30;
 
 /**
  * Message keys under home.manifesto — the copy itself lives in messages/*.json, where the
@@ -177,6 +189,24 @@ export function VideoSection() {
           timeline.to({}, { duration: 0.35 });
         }
       });
+
+      const stage = section.querySelector("[data-video-stage]");
+      if (!stage) return;
+
+      // Video and copy dissolve on their own once the reveal is done, so the about plate
+      // arrives over an empty screen instead of guillotining a still-visible section.
+      gsap.to(stage, {
+        autoAlpha: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: () =>
+            `top top-=${window.innerHeight * (LINES_SCROLL_VH / 100) + FADE_DELAY_PX}`,
+          end: () => `+=${window.innerHeight * (FADE_SCROLL_VH / 100)}`,
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
+      });
     },
     { scope: sectionRef },
   );
@@ -189,6 +219,7 @@ export function VideoSection() {
        * video flush to the left edge at 70vw, manifesto in the remaining 30vw.
        */}
       <div
+        data-video-stage
         className="flex h-dvh flex-col items-center md:flex-row md:items-center"
         style={{ position: "sticky", top: 0 }}
       >

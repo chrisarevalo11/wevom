@@ -2,11 +2,10 @@
 
 import { useRef } from "react";
 import { CATALOG_SLOTS, ROWS_PER_CYCLE } from "@/config/catalog-layout";
-import {
-  type CatalogItem,
-  CatalogProductCard,
-} from "@/features/products/catalog-product-card";
-import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import type { CatalogItem } from "@/features/products/catalog-browser";
+import { ProductMediaCard } from "@/features/products/product-media-card";
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { revealOnScroll } from "@/lib/reveal-on-scroll";
 
 export function ScatteredCatalog({ items }: { items: CatalogItem[] }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -16,72 +15,24 @@ export function ScatteredCatalog({ items }: { items: CatalogItem[] }) {
       const root = rootRef.current;
       if (!root) return;
 
-      const cards = gsap.utils.toArray<HTMLElement>("[data-catalog-card]", root);
-      const slots = gsap.utils.toArray<HTMLElement>("[data-catalog-slot]", root);
-      if (cards.length === 0) return;
+      revealOnScroll(gsap.utils.toArray<HTMLElement>("[data-product-card]", root));
 
-      if (prefersReducedMotion()) {
-        gsap.set(cards, { autoAlpha: 1 });
-        return;
-      }
-
-      // One trigger per card so each fades on its own visibility rather than the grid's
-      for (const card of cards) {
-        gsap.fromTo(
-          card,
-          { autoAlpha: 0, y: 28 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.9,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 85%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        );
-      }
-
-      /*
-       * Parallax drift lives on the slot wrapper, never on the card: the reveal above already
-       * owns the card's y, and two tweens fighting over one transform is a stutter.
-       *
-       * Desktop only — matchMedia reverts the tweens below md, where the single column is
-       * already tall and drifting cards mostly fight the scroll.
-       */
-      gsap.matchMedia().add("(min-width: 768px)", () => {
-        for (const [index, slot] of slots.entries()) {
-          const { drift } = CATALOG_SLOTS[index % CATALOG_SLOTS.length];
-
-          gsap.fromTo(
-            slot,
-            { y: drift },
-            {
-              y: -drift,
-              ease: "none",
-              scrollTrigger: {
-                trigger: slot,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: true,
-                invalidateOnRefresh: true,
-              },
-            },
-          );
-        }
-      });
+      // Filtering swaps the whole grid out from under the triggers, so their start/end
+      // positions have to be measured again
+      ScrollTrigger.refresh();
     },
-    { scope: rootRef, dependencies: [items.length], revertOnUpdate: true },
+    // `items` identity changes with the selected category, and revertOnUpdate tears the old
+    // triggers down before the new cards are measured
+    { scope: rootRef, dependencies: [items], revertOnUpdate: true },
   );
 
   return (
-    // gap-y-24 (96px) clears the widest parallax pair: two neighbouring rows drifting toward
-    // each other close at most 68px, so the space between cards never collapses onto an image
+    // Tight gaps on both axes: the per-slot column placement is what lets cards reach the
+    // viewport edges, and the per-slot top offsets carry the vertical rhythm — a large row
+    // gap here would put every row back on a visible line
     <div
       ref={rootRef}
-      className="flex flex-col md:grid md:grid-cols-12 md:gap-x-8 md:gap-y-24"
+      className="flex flex-col md:grid md:grid-cols-12 md:gap-x-4 md:gap-y-6 lg:gap-x-6"
     >
       {items.map((item, index) => {
         const slot = CATALOG_SLOTS[index % CATALOG_SLOTS.length];
@@ -90,13 +41,12 @@ export function ScatteredCatalog({ items }: { items: CatalogItem[] }) {
         return (
           <div
             key={item.id}
-            data-catalog-slot
             className={`${slot.mobile} ${slot.desktop}`}
             // Each pass through the slots starts a fresh band of rows. Ignored on mobile,
             // where the container is a plain flex column.
             style={{ gridRowStart: slot.row + cycle * ROWS_PER_CYCLE }}
           >
-            <CatalogProductCard item={item} aspect={slot.aspect} />
+            <ProductMediaCard item={item} aspect={slot.aspect} />
           </div>
         );
       })}

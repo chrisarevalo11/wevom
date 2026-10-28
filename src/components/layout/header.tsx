@@ -79,7 +79,12 @@ export function Header() {
   return (
     <header ref={headerRef} className="sticky top-0 z-40 mix-blend-difference">
       <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-6 sm:px-10 lg:px-12">
-        <div className="justify-self-start">
+        {/*
+         * Nudged 35px further out than the container padding on wide screens, so the two
+         * ends of the bar sit closer to the viewport edges. Margins rather than
+         * translate utilities: the scroll tween below writes transforms on these.
+         */}
+        <div className="justify-self-start lg:-ml-[35px]">
           <button
             ref={menuRef}
             type="button"
@@ -110,7 +115,7 @@ export function Header() {
 
         <div
           ref={cartRef}
-          className={cn(CHROME_CLASS, "justify-self-end", {
+          className={cn(CHROME_CLASS, "justify-self-end lg:-mr-[35px]", {
             "opacity-0": isMenuOpen,
           })}
           inert={isMenuOpen}

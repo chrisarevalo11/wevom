@@ -1,9 +1,10 @@
 import { create } from "zustand";
 
 /**
- * The storefront is not selling yet: anything that would start a purchase — a product card,
- * the cart in the navbar — opens the "coming soon" modal instead of navigating. One store so
- * every entry point shares a single dialog instance mounted in the root layout.
+ * Browsing is real — the catalog links through to product pages, the navbar opens the cart —
+ * but the placeholder products have no variants behind them, so the last step, adding one to
+ * the cart, raises this instead. One store so every entry point shares a single dialog
+ * instance mounted in the root layout.
  */
 type ComingSoonState = {
   isOpen: boolean;

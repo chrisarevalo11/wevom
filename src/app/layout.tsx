@@ -4,6 +4,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
+import { CustomCursor } from "@/components/ui/custom-cursor";
+import { ProductTransitionOverlay } from "@/components/ui/product-transition-overlay";
 import { siteConfig } from "@/config/site";
 import { CartDrawer } from "@/features/cart/cart-drawer";
 import { fontVariables, sourceCodePro } from "@/lib/fonts";
@@ -58,6 +60,10 @@ export default async function RootLayout({
             <CartDrawer />
             {/* One instance for every entry point that would otherwise start a purchase */}
             <ComingSoonModal />
+            {/* Outlives both pages, so a product image can cross between them */}
+            <ProductTransitionOverlay />
+            {/* Renders nothing on touch devices and under reduced motion */}
+            <CustomCursor />
           </Providers>
         </NextIntlClientProvider>
       </body>

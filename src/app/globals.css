@@ -30,3 +30,14 @@
     }
   }
 }
+
+/*
+ * Set by CustomCursor while its ring is up. The descendant rule matters: elements that ask
+ * for their own cursor (links, buttons, inputs) would otherwise show the system pointer
+ * alongside ours. Deliberately unlayered — anything inside a @layer loses to Tailwind's
+ * own utilities layer, where cursor-pointer lives.
+ */
+html.cursor-none,
+html.cursor-none * {
+  cursor: none;
+}

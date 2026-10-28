@@ -18,8 +18,7 @@ const SCENE_OPACITY = 0.55;
 const MENU_LINKS = [
   { href: "/", key: "home" },
   { href: "/products", key: "products" },
-  // About is off until the page is ready — see src/app/(marketing)/about/page.tsx
-  // { href: "/about", key: "about" },
+  { href: "/about", key: "about" },
 ] as const;
 
 type MenuOverlayProps = {

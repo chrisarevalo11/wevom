@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { SceneFallback } from "@/components/three/scene-fallback";
-import { useGSAP } from "@/lib/gsap";
+import { useHeroScrollFade } from "@/hooks/use-hero-scroll-fade";
 
 const BodySceneCanvas = dynamic(
   () =>
@@ -17,9 +17,9 @@ const BodySceneCanvas = dynamic(
 export function FixedHeroBodyLayer() {
   const layerRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    // Keep fixed body visible throughout the page — no separate footer body needed.
-  }, []);
+  // Fades out on the hero's way out and back in at the footer, where this same instance is
+  // the body the page ends on — no separate footer body needed.
+  useHeroScrollFade(layerRef, { restoreOnFooter: true });
 
   return (
     <div
