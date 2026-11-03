@@ -38,13 +38,81 @@
   "about": {
     "meta": {
       "title": "Nosotros",
-      "description": "Conoce más sobre {brand} y nuestro propósito."
+      "description": "Evom es un universo textil que explora el cuerpo y su movimiento."
     },
-    "eyebrow": "Nosotros",
-    "title": "Prendas creadas con propósito",
-    "body1": "{brand} es una tienda construida para una marca que quiere control total sobre diseño, rendimiento y experiencia, sin sacrificar la fiabilidad del comercio.",
-    "body2": "El catálogo, el inventario y el pago funcionan sobre Shopify, mientras el frontend entrega una experiencia rápida, animada y optimizada para buscadores.",
-    "body3": "Cada prenda se elige y se presenta con cuidado, reflejando nuestro compromiso con la calidad, la transparencia y el valor a largo plazo."
+    "cascade": [
+      "Evom",
+      "es un universo",
+      "textil",
+      "que explora",
+      "el cuerpo",
+      "y su movimiento.",
+      "A través de",
+      "la exploración",
+      "de texturas",
+      "y siluetas",
+      "las prendas",
+      "juegan",
+      "y toman vida",
+      "por medio",
+      "del cuerpo.",
+      "La danza",
+      "como medio",
+      "de investigación",
+      "de movimiento.",
+      "Las prendas",
+      "como una oda",
+      "al cuerpo."
+    ],
+    "lines": {
+      "intro": "Evom cuenta con tres líneas de exploración",
+      "items": [
+        {
+          "name": "Danza",
+          "fragments": [
+            "Enfocada",
+            "exclusivamente",
+            "en prendas",
+            "para bailarines",
+            "y la realización",
+            "de movimiento."
+          ]
+        },
+        {
+          "name": "Slow fashion",
+          "fragments": [
+            "Prendas",
+            "de uso diario,",
+            "producidas",
+            "de forma consciente",
+            "en Bogotá,",
+            "realizadas",
+            "en su mayoría",
+            "con patronaje",
+            "zero waste:",
+            "no genera residuos",
+            "ni desperdicios",
+            "textiles,",
+            "utilizando",
+            "toda la tela",
+            "en la prenda."
+          ]
+        },
+        {
+          "name": "Concepto",
+          "fragments": [
+            "Exploración",
+            "de biomateriales",
+            "y reutilización",
+            "de retazos",
+            "para la creación",
+            "de vestuario",
+            "conceptual",
+            "y/o escénico."
+          ]
+        }
+      ]
+    }
   },
   "products": {
     "meta": {

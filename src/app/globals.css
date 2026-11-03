@@ -84,3 +84,29 @@ html.cursor-none * {
     opacity: 1;
   }
 }
+
+/*
+ * The about page's cascade. Every fragment is a right-aligned block pushed in from the right
+ * by its place on an arc (--curve, set per fragment) times the arc's reach, so the text
+ * swings out across the screen and returns. Fragments start hidden; the page's entrance
+ * reveals them in order.
+ */
+.about-cascade [data-fragment] {
+  visibility: hidden;
+}
+.about-stair {
+  --stair-reach: 60%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55em;
+}
+.about-step {
+  margin-right: calc(var(--curve) * var(--stair-reach));
+}
+@media (min-width: 768px) {
+  .about-stair {
+    --stair-reach: 86%;
+    gap: 0.75em;
+  }
+}

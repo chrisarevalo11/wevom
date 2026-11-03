@@ -38,13 +38,79 @@
   "about": {
     "meta": {
       "title": "About",
-      "description": "Learn more about {brand} and our purpose."
+      "description": "Evom is a textile universe that explores the body and its movement."
     },
-    "eyebrow": "About us",
-    "title": "Garments crafted with purpose",
-    "body1": "{brand} is a storefront built for a brand that wants full control over design, performance, and experience without sacrificing commerce reliability.",
-    "body2": "The catalog, inventory, and checkout run on Shopify, while the frontend delivers a fast, animated, search-friendly experience.",
-    "body3": "Every garment is selected and presented with care, reflecting our commitment to quality, transparency, and long-term value."
+    "cascade": [
+      "Evom",
+      "is a textile",
+      "universe",
+      "that explores",
+      "the body",
+      "and its movement.",
+      "Through",
+      "the exploration",
+      "of textures",
+      "and silhouettes",
+      "the garments",
+      "play",
+      "and come alive",
+      "through",
+      "the body.",
+      "Dance",
+      "as a means",
+      "of researching",
+      "movement.",
+      "Garments",
+      "as an ode",
+      "to the body."
+    ],
+    "lines": {
+      "intro": "Evom has three lines of exploration",
+      "items": [
+        {
+          "name": "Dance",
+          "fragments": [
+            "Focused",
+            "exclusively",
+            "on garments",
+            "for dancers",
+            "and the making",
+            "of movement."
+          ]
+        },
+        {
+          "name": "Slow fashion",
+          "fragments": [
+            "Everyday",
+            "garments,",
+            "consciously",
+            "produced",
+            "in Bogotá,",
+            "made mostly",
+            "with zero waste",
+            "pattern making:",
+            "no textile waste",
+            "or scraps,",
+            "using",
+            "the whole fabric",
+            "in the garment."
+          ]
+        },
+        {
+          "name": "Concept",
+          "fragments": [
+            "Exploration",
+            "of biomaterials",
+            "and the reuse",
+            "of scraps",
+            "to create",
+            "conceptual",
+            "and/or stage",
+            "costume."
+          ]
+        }
+      ]
+    }
   },
   "products": {
     "meta": {

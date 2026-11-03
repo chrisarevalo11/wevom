@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "@/i18n/locales";
 
-type Messages = { [key: string]: string | Messages };
+type Messages = { [key: string]: string | Messages | Messages[] | string[] };
 
 /**
  * Fills gaps in a translation from the source language. Recursive rather than a spread,
@@ -15,8 +15,13 @@ function withFallback(base: Messages, override: Messages): Messages {
   for (const [key, value] of Object.entries(override)) {
     const fallbackValue = base[key];
 
+    // Lists (an array of fragments or items) are replaced whole: merging two lists of
+    // different lengths by index would splice languages together
     merged[key] =
-      typeof value === "object" && typeof fallbackValue === "object"
+      typeof value === "object" &&
+      typeof fallbackValue === "object" &&
+      !Array.isArray(value) &&
+      !Array.isArray(fallbackValue)
         ? withFallback(fallbackValue, value)
         : value;
   }
