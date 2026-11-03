@@ -8,8 +8,8 @@
  *
  * - card counts per row vary (three, two, or a single card left alone with the width around
  *   it), so no eye can lock onto a repeating pair;
- * - widths run from two columns to seven, and the aspect ratios with them, so neighbouring
- *   cards are never the same size;
+ * - widths run from three columns to seven, so neighbouring cards are never the same size;
+ *   each photo keeps its own proportions, so the heights vary with the garments themselves;
  * - the vertical offsets are large and unrelated to each other — up to fourteen rem — so two
  *   cards sharing a grid row almost never share a top edge. The grid row is bookkeeping that
  *   guarantees nothing overlaps; it is not a line you can see.
@@ -46,7 +46,6 @@ export type CatalogSlot = {
    * top of item 1. The layout offsets this by cycle instead.
    */
   row: number;
-  aspect: string;
 };
 
 const DESKTOP_RESET = "md:w-full md:self-auto";
@@ -57,104 +56,88 @@ export const CATALOG_SLOTS: CatalogSlot[] = [
     mobile: "w-[84%] self-start",
     desktop: `md:col-span-5 md:col-start-1 ${DESKTOP_RESET}`,
     row: 1,
-    aspect: "aspect-[3/4]",
   },
   {
-    mobile: "w-[42%] self-end mt-24",
+    mobile: "w-[54%] self-end mt-24",
     desktop: `md:col-span-4 md:col-start-9 md:mt-56 ${DESKTOP_RESET}`,
     row: 1,
-    aspect: "aspect-square",
   },
   // A narrow portrait beside a panorama that runs off the right edge
   {
-    mobile: "w-[38%] self-start mt-14",
+    mobile: "w-[52%] self-start mt-14",
     desktop: `md:col-span-3 md:col-start-2 md:mt-16 ${DESKTOP_RESET}`,
     row: 2,
-    aspect: "aspect-[2/3]",
   },
   {
     mobile: "w-[96%] self-center mt-20",
     desktop: `md:col-span-7 md:col-start-6 md:mt-64 ${DESKTOP_RESET}`,
     row: 2,
-    aspect: "aspect-[16/10]",
   },
   // Three across at three different heights — the busiest band
   {
     mobile: "w-[66%] self-start mt-16",
     desktop: `md:col-span-4 md:col-start-1 ${DESKTOP_RESET}`,
     row: 3,
-    aspect: "aspect-[4/5]",
   },
   {
-    mobile: "w-[30%] self-center mt-10",
-    desktop: `md:col-span-2 md:col-start-6 md:mt-36 ${DESKTOP_RESET}`,
+    mobile: "w-[50%] self-center mt-10",
+    desktop: `md:col-span-3 md:col-start-6 md:mt-36 ${DESKTOP_RESET}`,
     row: 3,
-    aspect: "aspect-square",
   },
   {
     mobile: "w-[54%] self-end mt-12",
     desktop: `md:col-span-4 md:col-start-9 md:mt-12 ${DESKTOP_RESET}`,
     row: 3,
-    aspect: "aspect-[3/4]",
   },
   // One card alone, off-centre, with the width left open around it
   {
     mobile: "w-[88%] self-center mt-20",
     desktop: `md:col-span-6 md:col-start-3 md:mt-28 ${DESKTOP_RESET}`,
     row: 4,
-    aspect: "aspect-[5/4]",
   },
   // Three again, this time small-large-small
   {
-    mobile: "w-[46%] self-start mt-16",
+    mobile: "w-[52%] self-start mt-16",
     desktop: `md:col-span-3 md:col-start-1 md:mt-8 ${DESKTOP_RESET}`,
     row: 5,
-    aspect: "aspect-[3/4]",
   },
   {
-    mobile: "w-[34%] self-end mt-12",
+    mobile: "w-[52%] self-end mt-12",
     desktop: `md:col-span-3 md:col-start-5 md:mt-48 ${DESKTOP_RESET}`,
     row: 5,
-    aspect: "aspect-square",
   },
   {
     mobile: "w-[60%] self-start mt-14",
     desktop: `md:col-span-4 md:col-start-9 ${DESKTOP_RESET}`,
     row: 5,
-    aspect: "aspect-[2/3]",
   },
   // A panorama spanning almost the whole width
   {
     mobile: "w-full mt-20",
     desktop: `md:col-span-7 md:col-start-2 md:mt-32 ${DESKTOP_RESET}`,
     row: 6,
-    aspect: "aspect-[16/9]",
   },
   // The smallest card on the page against two much larger ones
   {
-    mobile: "w-[28%] self-start mt-16",
-    desktop: `md:col-span-2 md:col-start-1 md:mt-20 ${DESKTOP_RESET}`,
+    mobile: "w-[50%] self-start mt-16",
+    desktop: `md:col-span-3 md:col-start-1 md:mt-20 ${DESKTOP_RESET}`,
     row: 7,
-    aspect: "aspect-square",
   },
   {
     mobile: "w-[70%] self-end mt-12",
     desktop: `md:col-span-4 md:col-start-4 md:mt-56 ${DESKTOP_RESET}`,
     row: 7,
-    aspect: "aspect-[4/5]",
   },
   {
     mobile: "w-[52%] self-start mt-16",
     desktop: `md:col-span-4 md:col-start-9 md:mt-4 ${DESKTOP_RESET}`,
     row: 7,
-    aspect: "aspect-[5/4]",
   },
   // Closes on a tall block pushed to the right half
   {
     mobile: "w-[80%] self-end mt-20",
     desktop: `md:col-span-6 md:col-start-6 md:mt-40 ${DESKTOP_RESET}`,
     row: 8,
-    aspect: "aspect-[3/4]",
   },
 ];
 
@@ -163,23 +146,24 @@ export const CATALOG_SLOTS: CatalogSlot[] = [
  *
  * Cards sit on a track that scrolls sideways, so the rhythm is the mirror of the stacked
  * layout above — the gap before each card is the irregular horizontal spacing, and `shift` is
- * how far down the track it hangs. Sizes run from a sixth of the viewport to nearly a third,
+ * how far down the track it hangs. Sizes run from a fifth of the viewport to nearly a third,
  * and the shifts are chosen against the card's own height so a short card hangs low and a tall
  * one sits high: nothing reaches the bottom of the screen, and no two neighbours line up.
  *
- * The full height of the screen is in play: some cards start above the top edge and are cut by
- * it, others are anchored to the bottom and sit a few vh off it. They pass behind the navbar
- * and behind the category column, both of which blend against whatever is behind them — that
- * crossing is the effect, not a collision to design around.
+ * The full height of the screen is in play: the cards hung from the top keep at least 15px of
+ * air above them (none touches the edge), others are anchored to the bottom and sit a few vh
+ * off it. They pass behind the navbar and behind the category column, both of which blend
+ * against whatever is behind them — that crossing is the effect, not a collision to design
+ * around.
  *
  * The bottom offsets are all different (2vh to 16vh) on purpose: a row of cards all touching
  * the bottom edge would be as much of a line as a row all floating above it.
  *
  * Widths are in vw and shifts in vh on purpose — the track is exactly one screen tall, and
- * both have to hold their proportions on any monitor. The max-height beside each aspect ratio
- * is the backstop for the one case vw units get wrong: a wide, short monitor, where a portrait
- * card sized off the width would stand taller than the screen it has to fit on. Past the cap
- * the ratio gives way and the image crops, which is what object-cover is there for.
+ * both have to hold their proportions on any monitor. Each photo keeps its own ratio, so the
+ * max-height is the backstop for the one case vw units get wrong: a wide, short monitor, where
+ * a portrait card sized off the width would stand taller than the screen it has to fit on.
+ * Under the cap the card narrows instead of cropping.
  */
 export type CatalogRailSlot = {
   /** Card width across the viewport */
@@ -197,85 +181,86 @@ export type CatalogRailSlot = {
    * that depends on how tall it happens to be, which on a short screen leaves the whole bottom
    * of the rail empty. The ones anchored to the bottom sit a known distance from it whatever
    * their size, and that is what stops the empty strip along the bottom edge from reading as a
-   * margin. Roughly half the slots hang from each edge; a negative top offset runs the card
-   * off the top, behind the navbar, which is what the navbar's blend mode is for.
+   * margin. Roughly half the slots hang from each edge; top offsets are 15px or more so no
+   * card touches the top edge.
    */
   place: string;
-  aspect: string;
+  /** Height cap (a CSS length); the card narrows to keep its photo's ratio under it */
+  maxHeight: string;
 };
 
 export const CATALOG_RAIL_SLOTS: CatalogRailSlot[] = [
   {
     width: "w-[26vw]",
     gap: "ml-[8vw]",
-    place: "self-start -mt-[12vh]",
-    aspect: "max-h-[86vh] aspect-[3/4]",
+    place: "self-start mt-[15px]",
+    maxHeight: "86vh",
   },
   {
-    width: "w-[15vw]",
+    width: "w-[22vw]",
     gap: "ml-[7vw]",
     place: "self-end mb-[3vh]",
-    aspect: "max-h-[40vh] aspect-square",
+    maxHeight: "40vh",
   },
   {
-    width: "w-[20vw]",
+    width: "w-[22vw]",
     gap: "ml-[4vw]",
     place: "self-start mt-[8vh]",
-    aspect: "max-h-[72vh] aspect-[2/3]",
+    maxHeight: "72vh",
   },
   {
     width: "w-[30vw]",
     gap: "ml-[11vw]",
     place: "self-end mb-[12vh]",
-    aspect: "max-h-[56vh] aspect-[16/10]",
+    maxHeight: "56vh",
   },
   {
-    width: "w-[18vw]",
+    width: "w-[23vw]",
     gap: "ml-[5vw]",
-    place: "self-start -mt-[6vh]",
-    aspect: "max-h-[72vh] aspect-[4/5]",
+    place: "self-start mt-[38px]",
+    maxHeight: "72vh",
   },
   {
     width: "w-[24vw]",
     gap: "ml-[9vw]",
     place: "self-end mb-[2vh]",
-    aspect: "max-h-[62vh] aspect-[5/4]",
+    maxHeight: "62vh",
   },
   {
-    width: "w-[16vw]",
+    width: "w-[22vw]",
     gap: "ml-[4vw]",
     place: "self-center mt-[4vh]",
-    aspect: "max-h-[64vh] aspect-[3/4]",
+    maxHeight: "64vh",
   },
   {
     width: "w-[22vw]",
     gap: "ml-[12vw]",
     place: "self-end mb-[16vh]",
-    aspect: "max-h-[54vh] aspect-square",
+    maxHeight: "54vh",
   },
   {
     width: "w-[28vw]",
     gap: "ml-[6vw]",
-    place: "self-start -mt-[2vh]",
-    aspect: "max-h-[58vh] aspect-[16/9]",
+    place: "self-start mt-[22px]",
+    maxHeight: "58vh",
   },
   {
-    width: "w-[15vw]",
+    width: "w-[22vw]",
     gap: "ml-[4vw]",
     place: "self-end mb-[6vh]",
-    aspect: "max-h-[62vh] aspect-[2/3]",
+    maxHeight: "62vh",
   },
   {
-    width: "w-[21vw]",
+    width: "w-[23vw]",
     gap: "ml-[10vw]",
     place: "self-start mt-[12vh]",
-    aspect: "max-h-[70vh] aspect-[4/5]",
+    maxHeight: "70vh",
   },
   {
     width: "w-[25vw]",
     gap: "ml-[5vw]",
     place: "self-end mb-[9vh]",
-    aspect: "max-h-[60vh] aspect-[5/4]",
+    maxHeight: "60vh",
   },
 ];
 
@@ -305,59 +290,60 @@ export const RAIL_TRACK_TAIL = "ml-[14vw]";
  */
 
 export type ShowcaseSlot = {
-  aspect: string;
   /** Mobile: width, alignment, spacing */
   mobile: string;
-  /** Desktop: grid column placement — rows are hard-coded, see below */
+  /** Desktop: grid column placement; the row comes from `row` */
   desktop: string;
+  /** Desktop grid row inside one pass of the composition (1-based) */
+  row: number;
 };
 
 /**
- * The home showcase is a single authored composition rather than a cycle: each slot pins a
- * `md:row-start-*`, so it holds at most `SHOWCASE_SLOTS.length` products and the fetch is
- * capped to that. Eight slots over four rows, each row a different count and width.
+ * The home showcase composition: eight slots over four rows, each row a different count and
+ * width. A longer list repeats the composition, so product nine lands on slot one again,
+ * `SHOWCASE_ROWS` further down — the row is a number rather than a class for that reason.
  */
+export const SHOWCASE_ROWS = 4;
+
 export const SHOWCASE_SLOTS: ShowcaseSlot[] = [
   {
-    aspect: "aspect-[3/4]",
     mobile: "w-[88%] self-start",
-    desktop: "md:col-span-5 md:col-start-1 md:row-start-1 md:translate-x-[100px]",
+    desktop: "md:col-span-5 md:col-start-1 md:translate-x-[100px]",
+    row: 1,
   },
   {
-    aspect: "aspect-[4/5]",
-    mobile: "w-[58%] self-end mt-10",
-    desktop:
-      "md:col-span-4 md:col-start-9 md:row-start-1 md:mt-28 md:translate-x-[100px]",
+    mobile: "w-[64%] self-end mt-10",
+    desktop: "md:col-span-4 md:col-start-9 md:mt-28 md:translate-x-[100px]",
+    row: 1,
   },
   {
-    aspect: "aspect-square",
-    mobile: "w-[48%] self-start mt-16",
-    desktop: "md:col-span-3 md:col-start-1 md:row-start-2 md:mt-[230px]",
+    mobile: "w-[62%] self-start mt-16",
+    desktop: "md:col-span-4 md:col-start-1 md:mt-[230px]",
+    row: 2,
   },
   {
-    aspect: "aspect-[3/5]",
     mobile: "w-[64%] self-end mt-14",
-    desktop: "md:col-span-5 md:col-start-8 md:row-start-2 md:mt-36",
+    desktop: "md:col-span-5 md:col-start-8 md:mt-36",
+    row: 2,
   },
   {
-    aspect: "aspect-square",
-    mobile: "w-[44%] self-start mt-12",
-    desktop: "md:col-span-3 md:col-start-2 md:row-start-3 md:mt-16",
+    mobile: "w-[62%] self-start mt-12",
+    desktop: "md:col-span-4 md:col-start-2 md:mt-16",
+    row: 3,
   },
   {
-    aspect: "aspect-[16/10]",
     mobile: "w-full mt-16",
-    desktop: "md:col-span-6 md:col-start-7 md:row-start-3 md:mt-24",
+    desktop: "md:col-span-6 md:col-start-7 md:mt-24",
+    row: 3,
   },
   {
-    aspect: "aspect-[4/5]",
-    mobile: "w-[52%] self-start mt-14",
-    desktop: "md:col-span-4 md:col-start-2 md:row-start-4 md:mt-32",
+    mobile: "w-[64%] self-start mt-14",
+    desktop: "md:col-span-4 md:col-start-2 md:mt-32",
+    row: 4,
   },
   {
-    aspect: "aspect-[3/4]",
     mobile: "w-[72%] self-end mt-12",
-    desktop:
-      "md:col-span-4 md:col-start-8 md:row-start-4 md:mt-8 md:translate-x-[60px]",
+    desktop: "md:col-span-4 md:col-start-8 md:mt-8 md:translate-x-[60px]",
+    row: 4,
   },
 ];

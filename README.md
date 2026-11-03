@@ -82,7 +82,7 @@ Until that file exists, a placeholder silhouette renders automatically. See `pub
 
 ## Products
 
-- The home showcase shows the newest products (up to the number of showcase slots); the catalog lists everything. Both read Shopify through `src/features/products/catalog.ts`, which is the single place to change when the showcase moves to a curated collection.
+- The home showcase shows the products of the Shopify "Home page" collection (handle `frontpage`), in the collection's own order, all of them. While that collection does not exist or is empty it shows the newest eight instead. The catalog lists everything. Both read Shopify through `src/features/products/catalog.ts`.
 - The category filter is driven by each product's **Product type** in Shopify Admin. Types are matched case- and accent-insensitively against the alias table in `src/config/product-categories.ts` (e.g. "Chaquetas" → jackets). A product with an empty or unknown type still appears under "All".
 - The second product image is the card's hover frame.
 - Storefront calls are cached for 60 s and tagged `products` / `product:<handle>`, ready for webhook-driven revalidation.

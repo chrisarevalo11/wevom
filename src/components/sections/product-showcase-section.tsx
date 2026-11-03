@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { TEXT_LINK_CLASS } from "@/components/ui/text-link";
-import { SHOWCASE_SLOTS } from "@/config/catalog-layout";
+import { SHOWCASE_ROWS, SHOWCASE_SLOTS } from "@/config/catalog-layout";
 import {
+  isLandscape,
+  LANDSCAPE_MOBILE_MIN,
   type ProductCardItem,
   ProductMediaCard,
 } from "@/features/products/product-media-card";
@@ -14,7 +16,7 @@ import { revealOnScroll } from "@/lib/reveal-on-scroll";
 import { cn } from "@/lib/utils/cn";
 
 type ProductShowcaseSectionProps = {
-  /** At most `SHOWCASE_SLOTS.length` — the composition has a fixed number of places */
+  /** Any length: the composition repeats every `SHOWCASE_SLOTS.length` products */
   items: ProductCardItem[];
 };
 
@@ -56,14 +58,20 @@ export function ProductShowcaseSection({ items }: ProductShowcaseSectionProps) {
         </header>
 
         <div className="flex flex-col gap-14 md:grid md:grid-cols-12 md:gap-x-8 md:gap-y-0 lg:gap-x-10">
-          {items.slice(0, SHOWCASE_SLOTS.length).map((item, index) => {
-            const slot = SHOWCASE_SLOTS[index];
+          {items.map((item, index) => {
+            const slot = SHOWCASE_SLOTS[index % SHOWCASE_SLOTS.length];
+            const pass = Math.floor(index / SHOWCASE_SLOTS.length);
             return (
               <ProductMediaCard
                 key={item.id}
                 item={item}
-                aspect={slot.aspect}
-                className={`${slot.mobile} ${slot.desktop}`}
+                className={cn(
+                  slot.mobile,
+                  slot.desktop,
+                  isLandscape(item) && LANDSCAPE_MOBILE_MIN,
+                )}
+                // Ignored on a phone, where the list is a flex column
+                style={{ gridRowStart: slot.row + pass * SHOWCASE_ROWS }}
               />
             );
           })}

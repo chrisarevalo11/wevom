@@ -82,7 +82,10 @@ export type GetProductByHandleQuery = { product?: StorefrontTypes.Maybe<(
     Pick<StorefrontTypes.Product, 'id' | 'title' | 'handle' | 'productType' | 'description' | 'descriptionHtml'>
     & { featuredImage?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Image, 'url' | 'altText' | 'width' | 'height'>>, images: { nodes: Array<Pick<StorefrontTypes.Image, 'url' | 'altText' | 'width' | 'height'>> }, options: Array<(
       Pick<StorefrontTypes.ProductOption, 'name'>
-      & { optionValues: Array<Pick<StorefrontTypes.ProductOptionValue, 'name'>> }
+      & { optionValues: Array<(
+        Pick<StorefrontTypes.ProductOptionValue, 'name'>
+        & { swatch?: StorefrontTypes.Maybe<Pick<StorefrontTypes.ProductOptionValueSwatch, 'color'>> }
+      )> }
     )>, variants: { nodes: Array<(
         Pick<StorefrontTypes.ProductVariant, 'id' | 'title' | 'availableForSale' | 'quantityAvailable'>
         & { selectedOptions: Array<Pick<StorefrontTypes.SelectedOption, 'name' | 'value'>>, price: Pick<StorefrontTypes.MoneyV2, 'amount' | 'currencyCode'>, image?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Image, 'url' | 'altText' | 'width' | 'height'>> }
@@ -124,11 +127,25 @@ export type GetCartDeliveryAddressesQueryVariables = StorefrontTypes.Exact<{
 
 export type GetCartDeliveryAddressesQuery = { cart?: StorefrontTypes.Maybe<{ delivery: { addresses: Array<Pick<StorefrontTypes.CartSelectableAddress, 'id'>> } }> };
 
+export type GetCollectionProductsQueryVariables = StorefrontTypes.Exact<{
+  handle: StorefrontTypes.Scalars['String']['input'];
+  first: StorefrontTypes.Scalars['Int']['input'];
+  language?: StorefrontTypes.InputMaybe<StorefrontTypes.LanguageCode>;
+  country?: StorefrontTypes.InputMaybe<StorefrontTypes.CountryCode>;
+}>;
+
+
+export type GetCollectionProductsQuery = { collection?: StorefrontTypes.Maybe<{ products: { nodes: Array<(
+        Pick<StorefrontTypes.Product, 'id' | 'title' | 'handle' | 'productType'>
+        & { images: { nodes: Array<Pick<StorefrontTypes.Image, 'url' | 'altText' | 'width' | 'height'>> }, priceRange: { minVariantPrice: Pick<StorefrontTypes.MoneyV2, 'amount' | 'currencyCode'> } }
+      )> } }> };
+
 interface GeneratedQueryTypes {
   "#graphql\n  query GetProducts(\n    $first: Int!\n    $after: String\n    $language: LanguageCode\n    $country: CountryCode\n  ) @inContext(language: $language, country: $country) {\n    products(first: $first, after: $after, sortKey: CREATED_AT, reverse: true) {\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      nodes {\n        id\n        title\n        handle\n        productType\n        images(first: 2) {\n          nodes {\n            url\n            altText\n            width\n            height\n          }\n        }\n        priceRange {\n          minVariantPrice {\n            amount\n            currencyCode\n          }\n        }\n      }\n    }\n  }\n": {return: GetProductsQuery, variables: GetProductsQueryVariables},
-  "#graphql\n  query GetProductByHandle(\n    $handle: String!\n    $language: LanguageCode\n    $country: CountryCode\n  ) @inContext(language: $language, country: $country) {\n    product(handle: $handle) {\n      id\n      title\n      handle\n      productType\n      description\n      descriptionHtml\n      featuredImage {\n        url\n        altText\n        width\n        height\n      }\n      images(first: 8) {\n        nodes {\n          url\n          altText\n          width\n          height\n        }\n      }\n      options {\n        name\n        optionValues {\n          name\n        }\n      }\n      variants(first: 50) {\n        nodes {\n          id\n          title\n          availableForSale\n          quantityAvailable\n          selectedOptions {\n            name\n            value\n          }\n          price {\n            amount\n            currencyCode\n          }\n          image {\n            url\n            altText\n            width\n            height\n          }\n        }\n      }\n      priceRange {\n        minVariantPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n": {return: GetProductByHandleQuery, variables: GetProductByHandleQueryVariables},
+  "#graphql\n  query GetProductByHandle(\n    $handle: String!\n    $language: LanguageCode\n    $country: CountryCode\n  ) @inContext(language: $language, country: $country) {\n    product(handle: $handle) {\n      id\n      title\n      handle\n      productType\n      description\n      descriptionHtml\n      featuredImage {\n        url\n        altText\n        width\n        height\n      }\n      images(first: 8) {\n        nodes {\n          url\n          altText\n          width\n          height\n        }\n      }\n      options {\n        name\n        optionValues {\n          name\n          swatch {\n            color\n          }\n        }\n      }\n      variants(first: 50) {\n        nodes {\n          id\n          title\n          availableForSale\n          quantityAvailable\n          selectedOptions {\n            name\n            value\n          }\n          price {\n            amount\n            currencyCode\n          }\n          image {\n            url\n            altText\n            width\n            height\n          }\n        }\n      }\n      priceRange {\n        minVariantPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n": {return: GetProductByHandleQuery, variables: GetProductByHandleQueryVariables},
   "#graphql\n  query GetCart($cartId: ID!) {\n    cart(id: $cartId) {\n      id\n      checkoutUrl\n      totalQuantity\n      cost {\n        subtotalAmount {\n          amount\n          currencyCode\n        }\n        totalAmount {\n          amount\n          currencyCode\n        }\n      }\n      lines(first: 50) {\n        edges {\n          node {\n            id\n            quantity\n            merchandise {\n              ... on ProductVariant {\n                id\n                title\n                quantityAvailable\n                product {\n                  title\n                  handle\n                  featuredImage {\n                    url\n                    altText\n                  }\n                }\n                price {\n                  amount\n                  currencyCode\n                }\n                image {\n                  url\n                  altText\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n": {return: GetCartQuery, variables: GetCartQueryVariables},
   "#graphql\n  query GetCartDeliveryAddresses($cartId: ID!) {\n    cart(id: $cartId) {\n      delivery {\n        addresses {\n          id\n        }\n      }\n    }\n  }\n": {return: GetCartDeliveryAddressesQuery, variables: GetCartDeliveryAddressesQueryVariables},
+  "#graphql\n  query GetCollectionProducts(\n    $handle: String!\n    $first: Int!\n    $language: LanguageCode\n    $country: CountryCode\n  ) @inContext(language: $language, country: $country) {\n    collection(handle: $handle) {\n      products(first: $first, sortKey: COLLECTION_DEFAULT) {\n        nodes {\n          id\n          title\n          handle\n          productType\n          images(first: 2) {\n            nodes {\n              url\n              altText\n              width\n              height\n            }\n          }\n          priceRange {\n            minVariantPrice {\n              amount\n              currencyCode\n            }\n          }\n        }\n      }\n    }\n  }\n": {return: GetCollectionProductsQuery, variables: GetCollectionProductsQueryVariables},
 }
 
 interface GeneratedMutationTypes {

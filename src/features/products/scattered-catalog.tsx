@@ -3,9 +3,14 @@
 import { useRef } from "react";
 import { CATALOG_SLOTS, ROWS_PER_CYCLE } from "@/config/catalog-layout";
 import type { CatalogItem } from "@/features/products/catalog-browser";
-import { ProductMediaCard } from "@/features/products/product-media-card";
+import {
+  isLandscape,
+  LANDSCAPE_MOBILE_MIN,
+  ProductMediaCard,
+} from "@/features/products/product-media-card";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { revealOnScroll } from "@/lib/reveal-on-scroll";
+import { cn } from "@/lib/utils/cn";
 
 export function ScatteredCatalog({ items }: { items: CatalogItem[] }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -41,12 +46,16 @@ export function ScatteredCatalog({ items }: { items: CatalogItem[] }) {
         return (
           <div
             key={item.id}
-            className={`${slot.mobile} ${slot.desktop}`}
+            className={cn(
+              slot.mobile,
+              slot.desktop,
+              isLandscape(item) && LANDSCAPE_MOBILE_MIN,
+            )}
             // Each pass through the slots starts a fresh band of rows. Ignored on mobile,
             // where the container is a plain flex column.
             style={{ gridRowStart: slot.row + cycle * ROWS_PER_CYCLE }}
           >
-            <ProductMediaCard item={item} aspect={slot.aspect} />
+            <ProductMediaCard item={item} />
           </div>
         );
       })}

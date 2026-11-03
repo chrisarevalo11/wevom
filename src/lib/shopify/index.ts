@@ -8,7 +8,12 @@ import type {
 } from "../../../types/storefront.generated";
 import { getShopifyClient } from "./client";
 import { storefrontContext } from "./context";
-import { getCartQuery, getProductByHandleQuery, getProductsQuery } from "./queries";
+import {
+  getCartQuery,
+  getCollectionProductsQuery,
+  getProductByHandleQuery,
+  getProductsQuery,
+} from "./queries";
 
 /*
  * Product shapes come straight from the generated query types (`bun run codegen`), so the
@@ -135,6 +140,29 @@ export async function getProductByHandle(
   assertData(data, errors, "Failed to fetch product");
 
   return data.product ?? null;
+}
+
+/**
+ * The products of one collection in the merchant's own order. Null when no collection has
+ * that handle (or it is not published to the storefront), so the caller can fall back.
+ */
+export async function getCollectionProducts(
+  handle: string,
+  first: number,
+  locale: Locale,
+): Promise<ProductNode[] | null> {
+  if (!isShopifyConfigured()) {
+    throw new ShopifyNotConfiguredError();
+  }
+
+  const client = getShopifyClient();
+  const { data, errors } = await client.request(getCollectionProductsQuery, {
+    variables: { handle, first, ...storefrontContext(locale) },
+  });
+
+  assertData(data, errors, "Failed to fetch collection");
+
+  return data.collection?.products.nodes ?? null;
 }
 
 /**

@@ -22,17 +22,49 @@ export type ProductCardItem = {
    * until Shopify supplies the real alternate shot — for now it borrows another product's.
    */
   hoverImage: string;
+  /** Width over height of `image`; null when the store did not report dimensions */
+  aspectRatio: number | null;
 };
+
+/** For a photo with no reported dimensions — most garment shots are upright */
+const FALLBACK_RATIO = 3 / 4;
+
+/**
+ * Phone-only width floor for a landscape photo. Sized by width, a wide shot in a half-width
+ * slot ends up a short strip and the garment in it tiny; this lets it claim most of the row
+ * while the slot's alignment and spacing still apply. No effect from md up, where the grid
+ * columns already give wide cards room.
+ */
+export const LANDSCAPE_MOBILE_MIN = "max-md:min-w-[86%]";
+
+export function isLandscape(item: ProductCardItem): boolean {
+  return (item.aspectRatio ?? FALLBACK_RATIO) > 1;
+}
 
 type ProductMediaCardProps = {
   item: ProductCardItem;
-  /** Comes from the slot, not the product: the same item reads at a different size per layout */
-  aspect: string;
+  /**
+   * A CSS length capping the frame's height. The frame then also narrows to keep the photo's
+   * ratio, so the layout decides how big a card is and the photo decides its shape.
+   */
+  maxHeight?: string;
   className?: string;
+  style?: React.CSSProperties;
 };
 
 /** The single product card: the home showcase and the catalog both render this one. */
-export function ProductMediaCard({ item, aspect, className }: ProductMediaCardProps) {
+export function ProductMediaCard({
+  item,
+  maxHeight,
+  className,
+  style,
+}: ProductMediaCardProps) {
+  const ratio = item.aspectRatio ?? FALLBACK_RATIO;
+  const frameStyle: React.CSSProperties = {
+    aspectRatio: ratio,
+    // Height-capped: the width follows the ratio down instead of the image cropping
+    width: maxHeight ? `min(100%, calc(${maxHeight} * ${ratio}))` : undefined,
+  };
   const frameRef = useRef<HTMLDivElement>(null);
   const startTransition = useProductTransitionStore((state) => state.start);
 
@@ -62,7 +94,7 @@ export function ProductMediaCard({ item, aspect, className }: ProductMediaCardPr
   };
 
   return (
-    <article data-product-card className={cn("flex flex-col", className)}>
+    <article data-product-card className={cn("flex flex-col", className)} style={style}>
       <Link
         href={item.href}
         onClick={onNavigate}
@@ -70,7 +102,8 @@ export function ProductMediaCard({ item, aspect, className }: ProductMediaCardPr
       >
         <div
           ref={frameRef}
-          className={cn("relative w-full overflow-hidden bg-surface-muted", aspect)}
+          className="relative w-full overflow-hidden bg-surface-muted"
+          style={frameStyle}
         >
           <Image
             src={item.image}

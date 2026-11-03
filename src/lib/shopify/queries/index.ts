@@ -65,6 +65,9 @@ export const getProductByHandleQuery = `#graphql
         name
         optionValues {
           name
+          swatch {
+            color
+          }
         }
       }
       variants(first: 50) {
@@ -156,6 +159,40 @@ export const getCartDeliveryAddressesQuery = `#graphql
       delivery {
         addresses {
           id
+        }
+      }
+    }
+  }
+`;
+
+export const getCollectionProductsQuery = `#graphql
+  query GetCollectionProducts(
+    $handle: String!
+    $first: Int!
+    $language: LanguageCode
+    $country: CountryCode
+  ) @inContext(language: $language, country: $country) {
+    collection(handle: $handle) {
+      products(first: $first, sortKey: COLLECTION_DEFAULT) {
+        nodes {
+          id
+          title
+          handle
+          productType
+          images(first: 2) {
+            nodes {
+              url
+              altText
+              width
+              height
+            }
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
         }
       }
     }

@@ -197,7 +197,7 @@ export function HorizontalCatalog({
                 key={item.id}
                 className={cn("shrink-0", slot.width, slot.gap, slot.place)}
               >
-                <ProductMediaCard item={item} aspect={slot.aspect} />
+                <ProductMediaCard item={item} maxHeight={slot.maxHeight} />
               </div>
             );
           })

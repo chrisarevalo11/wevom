@@ -29,18 +29,18 @@ type BodyLink = {
  * height for the upper pair, knee height for the lower pair.
  */
 const BODY_LINKS: BodyLink[] = [
-  { href: "/", key: "home", position: "left-[8%] top-[34%] sm:left-[16%]" },
+  { href: "/", key: "home", position: "left-[5%] top-[34%] sm:left-[16%]" },
   {
     href: "/products",
     key: "products",
-    position: "right-[8%] top-[34%] sm:right-[16%]",
+    position: "right-[5%] top-[34%] sm:right-[16%]",
   },
-  { href: "/about", key: "about", position: "left-[8%] top-[64%] sm:left-[16%]" },
+  { href: "/about", key: "about", position: "left-[5%] top-[64%] sm:left-[16%]" },
   {
     href: "https://www.instagram.com/evom_dw/",
     key: "instagram",
     isExternal: true,
-    position: "right-[8%] top-[64%] sm:right-[16%]",
+    position: "right-[5%] top-[64%] sm:right-[16%]",
   },
 ];
 

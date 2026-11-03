@@ -12,6 +12,7 @@ import { productHref } from "@/features/products/product-href";
 import type { ProductCardItem } from "@/features/products/product-media-card";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/locales";
 import {
+  getCollectionProducts,
   getProductByHandle,
   getProducts,
   type ProductDetail,
@@ -26,13 +27,20 @@ import { formatPrice, priceLocale } from "@/lib/utils/format-price";
  * and the detail page therefore share one mapping, one cache and one locale rule.
  */
 
-/** The showcase composition is authored slot by slot, so it can hold no more than this */
-export const SHOWCASE_COUNT = SHOWCASE_SLOTS.length;
+/** The fallback showcase: one pass of the composition, filled with the newest products */
+export const SHOWCASE_FALLBACK_COUNT = SHOWCASE_SLOTS.length;
 
 /** Plenty for the current range; paginate once the store outgrows it */
 const CATALOG_COUNT = 48;
 /** The option Shopify fabricates (value "Default Title") when a product has no options */
 const DEFAULT_OPTION_NAME = "Title";
+
+/**
+ * The collection the merchant curates for the home: Shopify's default "Home page" collection,
+ * whose handle is fixed. Edited in Admin under Products → Collections; its order is the order
+ * on the page. Until it exists the showcase falls back to the newest products.
+ */
+const SHOWCASE_COLLECTION_HANDLE = "frontpage";
 
 /** Products without a single image still need a box to sit in */
 const FALLBACK_IMAGE = "/images/p1.png";
@@ -48,6 +56,13 @@ const REVALIDATE_SECONDS = 60;
 const cachedProducts = unstable_cache(
   (first: number, locale: Locale) => getProducts({ first, locale }),
   ["shopify-products"],
+  { tags: [PRODUCTS_TAG], revalidate: REVALIDATE_SECONDS },
+);
+
+const cachedShowcaseCollection = unstable_cache(
+  (locale: Locale) =>
+    getCollectionProducts(SHOWCASE_COLLECTION_HANDLE, CATALOG_COUNT, locale),
+  ["shopify-showcase-collection"],
   { tags: [PRODUCTS_TAG], revalidate: REVALIDATE_SECONDS },
 );
 
@@ -82,6 +97,8 @@ function toCardItem(product: ProductNode, locale: Locale): ProductCardItem {
     image,
     // The second shot is the hover frame; with only one, the crossfade lands on the same image
     hoverImage: second?.url ?? image,
+    // Cards keep the photo's own proportions, so nothing is cropped into a shape it was not shot in
+    aspectRatio: first?.width && first?.height ? first.width / first.height : null,
   };
 }
 
@@ -93,8 +110,8 @@ function toCatalogItem(product: ProductNode, locale: Locale): CatalogItem {
 }
 
 /**
- * The home picks. Today the newest products; when the merchant curates a collection for the
- * home, swap the fetch here for `collection(handle: "home-showcase")` and nothing else moves.
+ * The home picks: every product of the curated collection when it has any, otherwise the
+ * newest eight so the home is never empty.
  */
 export async function getShowcaseItems(): Promise<ProductCardItem[]> {
   if (!isShopifyConfigured()) return [];
@@ -102,7 +119,11 @@ export async function getShowcaseItems(): Promise<ProductCardItem[]> {
   const locale = await currentLocale();
 
   try {
-    const { products } = await cachedProducts(SHOWCASE_COUNT, locale);
+    const curated = await cachedShowcaseCollection(locale);
+    const products =
+      curated && curated.length > 0
+        ? curated
+        : (await cachedProducts(SHOWCASE_FALLBACK_COUNT, locale)).products;
     return products.map((product) => toCardItem(product, locale));
   } catch (error) {
     reportError("showcase", error);
