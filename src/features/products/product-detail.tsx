@@ -24,10 +24,23 @@ const INFO_HEIGHT_VAR = "--product-info-height";
 /** The quantity stepper reads a step up from the rest of the panel, so the count is easy to see */
 const STEPPER_TEXT = "text-base sm:text-lg";
 
+export type ProductOptionValue = {
+  name: string;
+  /** Swatch hex from Shopify, when the merchant linked the option to a colour metafield */
+  color: string | null;
+};
+
 export type ProductOption = {
   name: string;
-  values: string[];
+  values: ProductOptionValue[];
 };
+
+/** An option whose every value carries a colour is drawn as swatches instead of words */
+function isColorOption(option: ProductOption): boolean {
+  return (
+    option.values.length > 0 && option.values.every((value) => value.color !== null)
+  );
+}
 
 export type ProductVariant = {
   id: string;
@@ -42,9 +55,10 @@ export type ProductVariant = {
 export type ProductDetailView = {
   title: string;
   price: string;
+  /** Plain text, for the page's meta description */
   description: string;
-  composition: string;
-  care: string;
+  /** The same text as the merchant laid it out in Admin, cleaned by `cleanRichText` */
+  descriptionHtml: string;
   options: ProductOption[];
   variants: ProductVariant[];
   images: { src: string; alt: string }[];
@@ -56,6 +70,54 @@ function findVariant(variants: ProductVariant[], picks: Record<string, string>) 
     Object.entries(picks).every(
       ([name, value]) => variant.selectedOptions[name] === value,
     ),
+  );
+}
+
+/**
+ * The description as written in Shopify's editor, in the site's own type. On a phone it is
+ * clamped to two lines by default — the info panel sits over the images and a long text was
+ * eating the screen — with a toggle to read the rest. The toggle only shows when the text is
+ * actually longer than the clamp. Desktop always shows the whole thing. The outer panel
+ * re-measures itself through a ResizeObserver, so toggling needs no extra plumbing here.
+ */
+function CollapsibleDescription({ html }: { html: string }) {
+  const t = useTranslations("product");
+  const ref = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    // Measured while clamped: once expanded the block never overflows
+    const measure = () => {
+      if (!expanded) setOverflows(element.scrollHeight > element.clientHeight + 1);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [expanded]);
+
+  return (
+    <div>
+      {/* Merchant-authored HTML from Admin, already cleaned on the server */}
+      <div
+        ref={ref}
+        className={cn("rich-text lg:line-clamp-none", !expanded && "line-clamp-2")}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+      {overflows && (
+        <button
+          type="button"
+          onClick={() => setExpanded((open) => !open)}
+          aria-expanded={expanded}
+          className="mt-1 cursor-pointer font-sans text-[10px] uppercase tracking-[0.24em] text-text transition hover:opacity-60 lg:hidden"
+        >
+          {expanded ? t("readLess") : t("readMore")}
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -124,12 +186,9 @@ function ProductInfo({ product }: { product: ProductDetailView }) {
           <h1 className="font-sans text-xs font-medium uppercase tracking-[0.18em] text-text sm:text-sm">
             {product.title}
           </h1>
-          <p className="font-sans text-xs tracking-wide text-text-muted">
-            {product.description}
-          </p>
-          <p className="font-sans text-xs tracking-wide text-text-muted">
-            {product.composition}
-          </p>
+          {product.descriptionHtml && (
+            <CollapsibleDescription html={product.descriptionHtml} />
+          )}
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-3 text-right">
@@ -144,27 +203,54 @@ function ProductInfo({ product }: { product: ProductDetailView }) {
           {product.options.map((option) => (
             <fieldset
               key={option.name}
-              className="flex flex-wrap justify-end gap-x-3 gap-y-1"
+              className={cn(
+                "flex flex-wrap justify-end",
+                isColorOption(option) ? "gap-2.5 pt-1" : "gap-x-3 gap-y-1",
+              )}
             >
               <legend className="sr-only">{option.name}</legend>
-              {option.values.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  disabled={!isOffered(option.name, value)}
-                  aria-pressed={picks[option.name] === value}
-                  onClick={() => pick(option.name, value)}
-                  className={cn(
-                    TEXT_LINK_CLASS,
-                    "cursor-pointer disabled:cursor-default disabled:line-through disabled:opacity-40",
-                    picks[option.name] === value
-                      ? TEXT_LINK_ACTIVE
-                      : TEXT_LINK_INACTIVE,
-                  )}
-                >
-                  {value}
-                </button>
-              ))}
+              {option.values.map(({ name: value, color }) => {
+                const selected = picks[option.name] === value;
+                const offered = isOffered(option.name, value);
+                return isColorOption(option) ? (
+                  /*
+                   * Round swatch filled with the store's hex. The ring marks the pick; a faint
+                   * border keeps white readable on the page; a diagonal line crosses out a
+                   * colour that is not purchasable with the other current picks.
+                   */
+                  <button
+                    key={value}
+                    type="button"
+                    title={value}
+                    aria-label={value}
+                    disabled={!offered}
+                    aria-pressed={selected}
+                    onClick={() => pick(option.name, value)}
+                    style={{ backgroundColor: color ?? undefined }}
+                    className={cn(
+                      "relative size-5 cursor-pointer rounded-full border border-black/15 transition disabled:cursor-default disabled:opacity-40",
+                      selected && "ring-1 ring-text ring-offset-2 ring-offset-surface",
+                      !offered &&
+                        "after:absolute after:left-1/2 after:top-1/2 after:h-px after:w-[140%] after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:bg-text",
+                    )}
+                  />
+                ) : (
+                  <button
+                    key={value}
+                    type="button"
+                    disabled={!offered}
+                    aria-pressed={selected}
+                    onClick={() => pick(option.name, value)}
+                    className={cn(
+                      TEXT_LINK_CLASS,
+                      "cursor-pointer disabled:cursor-default disabled:line-through disabled:opacity-40",
+                      selected ? TEXT_LINK_ACTIVE : TEXT_LINK_INACTIVE,
+                    )}
+                  >
+                    {value}
+                  </button>
+                );
+              })}
             </fieldset>
           ))}
         </div>

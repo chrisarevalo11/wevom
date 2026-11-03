@@ -41,3 +41,37 @@ html.cursor-none,
 html.cursor-none * {
   cursor: none;
 }
+
+/*
+ * Product descriptions come from Shopify's editor as HTML. The editor's own classes and
+ * styles are stripped on the server (see cleanRichText); these rules give what is left the
+ * site's type. Scoped to a class rather than @layer so the merchant's emphasis and links
+ * read in the brand's voice everywhere the description shows.
+ */
+.rich-text {
+  @apply font-sans text-xs tracking-wide text-text-muted;
+}
+.rich-text p + p {
+  @apply mt-1.5;
+}
+.rich-text strong,
+.rich-text b {
+  @apply font-medium text-text;
+}
+.rich-text a {
+  @apply underline underline-offset-2 text-text transition hover:opacity-60;
+}
+.rich-text ul,
+.rich-text ol {
+  @apply pl-4;
+}
+.rich-text ul {
+  @apply list-disc;
+}
+.rich-text ol {
+  @apply list-decimal;
+}
+.rich-text [data-align="center"] {
+  @apply text-center;
+}
+

@@ -72,12 +72,9 @@
     "care": "Care",
     "decrease": "Decrease quantity",
     "increase": "Increase quantity",
+    "readMore": "See more",
+    "readLess": "See less",
     "closeImage": "Close",
-    "sample": {
-      "description": "Cut and sewn in Bogotá, in a limited run.",
-      "composition": "100% cotton · deadstock lining",
-      "care": "Hand wash cold. Dry flat, away from direct sun. Do not bleach or tumble dry."
-    },
     "soldOut": "Sold out",
     "oneSize": "One size"
   },

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { cache } from "react";
 import { SHOWCASE_SLOTS } from "@/config/catalog-layout";
 import { familyFromProductType } from "@/config/product-categories";
@@ -20,6 +20,7 @@ import {
   stockLimit,
 } from "@/lib/shopify";
 import { formatPrice, priceLocale } from "@/lib/utils/format-price";
+import { cleanRichText } from "@/lib/utils/rich-text";
 
 /*
  * The one place Shopify products become what the pages render. Pages call the three
@@ -145,23 +146,7 @@ export async function getCatalogItems(): Promise<CatalogItem[]> {
   }
 }
 
-/** The copy Shopify doesn't carry yet — metafields are the next step for these */
-type SampleCopy = { description: string; composition: string; care: string };
-
-async function getSampleCopy(): Promise<SampleCopy> {
-  const t = await getTranslations("product.sample");
-  return {
-    description: t("description"),
-    composition: t("composition"),
-    care: t("care"),
-  };
-}
-
-function toDetailView(
-  product: ProductDetail,
-  copy: SampleCopy,
-  locale: Locale,
-): ProductDetailView {
+function toDetailView(product: ProductDetail, locale: Locale): ProductDetailView {
   const variants = product.variants.nodes;
   const variant = variants[0];
   const price = variant?.price ?? product.priceRange.minVariantPrice;
@@ -176,7 +161,11 @@ function toDetailView(
     .filter((entry) => entry.name !== DEFAULT_OPTION_NAME)
     .map((entry) => ({
       name: entry.name,
-      values: entry.optionValues.map((value) => value.name),
+      values: entry.optionValues.map((value) => ({
+        name: value.name,
+        // Set in Admin when the option is linked to the colour category metafield
+        color: value.swatch?.color ?? null,
+      })),
     }));
   const variantViews = variants.map((candidate) => ({
     id: candidate.id,
@@ -199,9 +188,9 @@ function toDetailView(
   return {
     title: product.title,
     price: formatPrice(price.amount, price.currencyCode, priceLocale(locale)),
-    ...copy,
-    // The store's own description wins over the placeholder line
-    description: product.description || copy.description,
+    description: product.description,
+    // Written in Admin's editor; rendered as it is there, in the site's own type
+    descriptionHtml: cleanRichText(product.descriptionHtml),
     options,
     variants: variantViews,
     images: images.map((image) => ({
@@ -222,11 +211,8 @@ export const getProductView = cache(
     const locale = await currentLocale();
 
     try {
-      const [product, copy] = await Promise.all([
-        cachedProduct(handle, locale),
-        getSampleCopy(),
-      ]);
-      return product ? toDetailView(product, copy, locale) : null;
+      const product = await cachedProduct(handle, locale);
+      return product ? toDetailView(product, locale) : null;
     } catch (error) {
       reportError(`product ${handle}`, error);
       return null;

@@ -72,12 +72,9 @@
     "care": "Cuidados",
     "decrease": "Disminuir cantidad",
     "increase": "Aumentar cantidad",
+    "readMore": "Ver más",
+    "readLess": "Ver menos",
     "closeImage": "Cerrar",
-    "sample": {
-      "description": "Confeccionada en Bogotá, en una serie limitada.",
-      "composition": "100% algodón · forro en deadstock",
-      "care": "Lavar a mano en frío. Secar en plano, lejos del sol directo. No usar blanqueador ni secadora."
-    },
     "soldOut": "Agotado",
     "oneSize": "Talla única"
   },
