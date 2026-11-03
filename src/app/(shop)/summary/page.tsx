@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShopifySetupNotice } from "@/components/ui/shopify-setup-notice";
 import { isShopifyConfigured } from "@/env";
@@ -9,7 +10,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("title"), description: t("description") };
 }
 
+/**
+ * Parked until the payment flow is decided: the cart hands straight to Shopify's checkout
+ * meanwhile. Flip this to bring the page back; everything behind it still works.
+ */
+const SUMMARY_ENABLED = false;
+
 export default function SummaryPage() {
+  if (!SUMMARY_ENABLED) notFound();
+
   if (!isShopifyConfigured()) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-24 sm:px-6 lg:px-8">

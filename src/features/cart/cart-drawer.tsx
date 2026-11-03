@@ -328,14 +328,18 @@ export function CartDrawer() {
             ) : null}
 
             <div className="flex items-end justify-end gap-6">
-              {hasLines ? (
-                <Link
-                  href="/summary"
-                  onClick={close}
+              {/*
+               * Straight to Shopify's checkout for now: the summary page (/summary) is parked
+               * until the payment flow is decided. A plain anchor, since checkout lives on
+               * Shopify's domain and this is a full navigation.
+               */}
+              {hasLines && cart ? (
+                <a
+                  href={cart.checkoutUrl}
                   className={cn(TEXT_LINK_CLASS, TEXT_LINK_ACTIVE, "hover:opacity-60")}
                 >
                   {t("checkout")}
-                </Link>
+                </a>
               ) : null}
             </div>
           </div>
