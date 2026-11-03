@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import {
   PRODUCT_HERO_ATTRIBUTE,
@@ -14,6 +14,7 @@ import {
   TEXT_LINK_INACTIVE,
 } from "@/components/ui/text-link";
 import { useAddToCart } from "@/features/cart/hooks/use-add-to-cart";
+import { prefersReducedMotion } from "@/lib/gsap";
 import { cn } from "@/lib/utils/cn";
 import { useComingSoonStore } from "@/stores/coming-soon-store";
 import { useProductTransitionStore } from "@/stores/product-transition-store";
@@ -61,8 +62,29 @@ export type ProductDetailView = {
   descriptionHtml: string;
   options: ProductOption[];
   variants: ProductVariant[];
+  /** Images and videos in the order Admin shows them */
+  media: ProductMedia[];
+  /** The images alone, for the page's metadata */
   images: { src: string; alt: string }[];
 };
+
+export type ProductMedia =
+  | { kind: "image"; src: string; alt: string }
+  | {
+      kind: "video";
+      /** mp4 renditions, best first */
+      sources: { src: string; type: string }[];
+      poster: string | null;
+      alt: string;
+    };
+
+/** The store's custom-size option value, matched loosely so "Sobre Medida" or "sobre medida" both count */
+function isMadeToMeasure(value: string): boolean {
+  return (
+    value.normalize("NFD").replace(/\p{M}/gu, "").trim().toLowerCase() ===
+    "sobre medida"
+  );
+}
 
 /** The variant whose options all equal the current picks, if the store sells that combination */
 function findVariant(variants: ProductVariant[], picks: Record<string, string>) {
@@ -245,14 +267,66 @@ function ProductInfo({ product }: { product: ProductDetailView }) {
                       TEXT_LINK_CLASS,
                       "cursor-pointer disabled:cursor-default disabled:line-through disabled:opacity-40",
                       selected ? TEXT_LINK_ACTIVE : TEXT_LINK_INACTIVE,
+                      // Custom size sits on a line of its own under the regular sizes
+                      isMadeToMeasure(value) &&
+                        option.values.length > 1 &&
+                        "basis-full text-right",
                     )}
                   >
                     {value}
+                    {isMadeToMeasure(value) && (
+                      // The footnote mark; the note below opens with the same one
+                      <sup aria-hidden className="ml-0.5 text-[0.8em] leading-none">
+                        *
+                      </sup>
+                    )}
                   </button>
                 );
               })}
             </fieldset>
           ))}
+        </div>
+      </div>
+
+      {/*
+       * How to send measurements, only once the custom size is the pick. Outside the two
+       * columns so neither changes width when it appears, and unfolded through a grid-row
+       * transition so the panel grows rather than jumps.
+       */}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-300 ease-out",
+          Object.values(picks).some(isMadeToMeasure)
+            ? "grid-rows-[1fr]"
+            : "grid-rows-[0fr]",
+        )}
+      >
+        <div className="overflow-hidden">
+          <p className="ml-auto max-w-[20rem] pt-3 text-right font-sans text-[10px] leading-relaxed tracking-wide text-text-muted">
+            <sup aria-hidden className="mr-0.5 text-[0.8em] leading-none">
+              *
+            </sup>
+            {t.rich("madeToMeasure", {
+              instagram: (chunks) => (
+                <a
+                  href="https://www.instagram.com/evom_dw/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-text underline underline-offset-2 transition hover:opacity-60"
+                >
+                  {chunks}
+                </a>
+              ),
+              email: (chunks) => (
+                <a
+                  href="mailto:evom.dw@gmail.com"
+                  className="text-text underline underline-offset-2 transition hover:opacity-60"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
+          </p>
         </div>
       </div>
 
@@ -317,10 +391,68 @@ function ProductInfo({ product }: { product: ProductDetailView }) {
   );
 }
 
+/**
+ * A product video in the gallery: muted, looping, playing by itself while it is on screen and
+ * paused the moment it scrolls off, so a page with several never plays them all at once.
+ * Under reduced motion it waits for the visitor instead, with the browser's own controls.
+ */
+function ProductVideo({
+  video,
+  className,
+}: {
+  video: ProductMedia & { kind: "video" };
+  className?: string;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [manual, setManual] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    if (prefersReducedMotion()) {
+      setManual(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          // play() can reject when the browser refuses autoplay; the poster stays up then
+          element.play().catch(() => setManual(true));
+        } else {
+          element.pause();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      ref={ref}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      poster={video.poster ?? undefined}
+      aria-label={video.alt}
+      controls={manual}
+      className={cn("block h-auto w-full", className)}
+    >
+      {video.sources.map((source) => (
+        <source key={source.src} src={source.src} type={source.type} />
+      ))}
+    </video>
+  );
+}
+
 export function ProductDetail({ product }: { product: ProductDetailView }) {
   const t = useTranslations("product");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const openImage = openIndex === null ? null : product.images[openIndex];
+  const openEntry = openIndex === null ? null : product.media[openIndex];
+  const openImage = openEntry?.kind === "image" ? openEntry : null;
 
   /*
    * A card is mid-flight towards this page. Its overlay is parked exactly where the first
@@ -366,38 +498,47 @@ export function ProductDetail({ product }: { product: ProductDetailView }) {
       <div ref={gridRef} className="-mt-16 grid grid-cols-1 lg:grid-cols-[60vw_1fr]">
         {/* Full width, no gap: the images are the page */}
         <div className="col-start-1 row-start-1 flex flex-col">
-          {product.images.map((image, index) => (
-            <button
-              key={image.src}
-              type="button"
-              aria-label={image.alt}
-              onClick={() => setOpenIndex(index)}
-              // The first image is the one a card morphs into, and the only one the overlay
-              // looks for
-              {...(index === 0 ? { [PRODUCT_HERO_ATTRIBUTE]: "" } : {})}
-              className={cn(
-                "relative block w-full cursor-zoom-in",
-                index === 0 && isArriving && "invisible",
-              )}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={1200}
-                height={1500}
-                priority={index === 0}
-                // The first image is the box a card lands in, cropped to fit: on a phone the
-                // screen above the pinned info panel, on desktop the full viewport height of its
-                // column. The rest keep their own proportions below it
-                className={cn(
-                  "h-auto w-full object-cover",
-                  index === 0 &&
-                    "h-[calc(100svh-var(--product-info-height,0px))] lg:h-screen",
-                )}
-                sizes="(max-width: 1024px) 100vw, 60vw"
+          {product.media.map((entry, index) =>
+            entry.kind === "video" ? (
+              // Videos play on their own as they scroll into view; nothing to zoom into
+              <ProductVideo
+                key={entry.sources[0]?.src}
+                video={entry}
+                className={index === 0 && isArriving ? "invisible" : undefined}
               />
-            </button>
-          ))}
+            ) : (
+              <button
+                key={entry.src}
+                type="button"
+                aria-label={entry.alt}
+                onClick={() => setOpenIndex(index)}
+                // The first image is the one a card morphs into, and the only one the overlay
+                // looks for
+                {...(index === 0 ? { [PRODUCT_HERO_ATTRIBUTE]: "" } : {})}
+                className={cn(
+                  "relative block w-full cursor-zoom-in",
+                  index === 0 && isArriving && "invisible",
+                )}
+              >
+                <Image
+                  src={entry.src}
+                  alt={entry.alt}
+                  width={1200}
+                  height={1500}
+                  priority={index === 0}
+                  // The first image is the box a card lands in, cropped to fit: on a phone the
+                  // screen above the pinned info panel, on desktop the full viewport height of its
+                  // column. The rest keep their own proportions below it
+                  className={cn(
+                    "h-auto w-full object-cover",
+                    index === 0 &&
+                      "h-[calc(100svh-var(--product-info-height,0px))] lg:h-screen",
+                  )}
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                />
+              </button>
+            ),
+          )}
         </div>
 
         {/*

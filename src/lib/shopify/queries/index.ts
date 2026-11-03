@@ -53,12 +53,32 @@ export const getProductByHandleQuery = `#graphql
         width
         height
       }
-      images(first: 8) {
+      media(first: 20) {
         nodes {
-          url
-          altText
-          width
-          height
+          __typename
+          mediaContentType
+          ... on MediaImage {
+            image {
+              url
+              altText
+              width
+              height
+            }
+          }
+          ... on Video {
+            alt
+            previewImage {
+              url
+              width
+              height
+            }
+            sources {
+              url
+              mimeType
+              width
+              height
+            }
+          }
         }
       }
       options {

@@ -7,7 +7,10 @@ import { SHOWCASE_SLOTS } from "@/config/catalog-layout";
 import { familyFromProductType } from "@/config/product-categories";
 import { isShopifyConfigured } from "@/env";
 import type { CatalogItem } from "@/features/products/catalog-browser";
-import type { ProductDetailView } from "@/features/products/product-detail";
+import type {
+  ProductDetailView,
+  ProductMedia,
+} from "@/features/products/product-detail";
 import { productHref } from "@/features/products/product-href";
 import type { ProductCardItem } from "@/features/products/product-media-card";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/locales";
@@ -157,6 +160,16 @@ export async function getCatalogItems(): Promise<CatalogItem[]> {
   }
 }
 
+/**
+ * Shopify renders every video at several sizes. 720p is the one to play: sharp on any product
+ * column, a third the weight of 1080p. The rest follow in order of closeness, for browsers that
+ * cannot play the first.
+ */
+const PREFERRED_VIDEO_HEIGHT = 1238;
+function videoPreference(height: number | null | undefined): number {
+  return Math.abs((height ?? 0) - PREFERRED_VIDEO_HEIGHT);
+}
+
 function toDetailView(product: ProductDetail, locale: Locale): ProductDetailView {
   const variants = product.variants.nodes;
   const variant = variants[0];
@@ -189,12 +202,40 @@ function toDetailView(product: ProductDetail, locale: Locale): ProductDetailView
     ),
   }));
 
-  const images =
-    product.images.nodes.length > 0
-      ? product.images.nodes
-      : product.featuredImage
-        ? [product.featuredImage]
-        : [];
+  const media = product.media.nodes.flatMap((entry): ProductMedia[] => {
+    if (entry.__typename === "MediaImage" && entry.image) {
+      return [
+        {
+          kind: "image",
+          src: entry.image.url,
+          alt: entry.image.altText ?? product.title,
+        },
+      ];
+    }
+    if (entry.__typename === "Video") {
+      const sources = entry.sources
+        .filter((source) => source.mimeType === "video/mp4")
+        .sort((a, b) => videoPreference(a.height) - videoPreference(b.height))
+        .map((source) => ({ src: source.url, type: source.mimeType }));
+      if (sources.length === 0) return [];
+      return [
+        {
+          kind: "video",
+          sources,
+          poster: entry.previewImage?.url ?? null,
+          alt: entry.alt || product.title,
+        },
+      ];
+    }
+    return [];
+  });
+  if (media.length === 0 && product.featuredImage) {
+    media.push({
+      kind: "image",
+      src: product.featuredImage.url,
+      alt: product.featuredImage.altText ?? product.title,
+    });
+  }
 
   return {
     title: product.title,
@@ -204,10 +245,10 @@ function toDetailView(product: ProductDetail, locale: Locale): ProductDetailView
     descriptionHtml: cleanRichText(product.descriptionHtml),
     options,
     variants: variantViews,
-    images: images.map((image) => ({
-      src: image.url,
-      alt: image.altText ?? product.title,
-    })),
+    media,
+    images: media.flatMap((entry) =>
+      entry.kind === "image" ? [{ src: entry.src, alt: entry.alt }] : [],
+    ),
   };
 }
 
