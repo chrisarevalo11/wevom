@@ -8,7 +8,7 @@ export function HeroBodyCanvas() {
       variant="hero"
       enableStretch
       enableFloat
-      className="pointer-events-none touch-none"
+      className="pointer-events-none"
     />
   );
 }

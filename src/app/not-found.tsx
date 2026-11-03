@@ -26,7 +26,6 @@ export default async function NotFound() {
             enableStretch={false}
             enableFloat
             showGradient={false}
-            className="touch-none"
           />
         </div>
       </div>

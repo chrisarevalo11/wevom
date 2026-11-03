@@ -27,7 +27,7 @@ export function FixedHeroBodyLayer() {
       className="pointer-events-none fixed inset-0 z-[2] flex items-center justify-center"
       aria-hidden="true"
     >
-      <div className="h-full w-full max-w-md sm:max-w-xl">
+      <div className="h-full w-full max-w-[20rem] sm:max-w-xl">
         <BodySceneCanvas enableStretch enableFloat variant="hero" />
       </div>
     </div>

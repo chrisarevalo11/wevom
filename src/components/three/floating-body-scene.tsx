@@ -32,7 +32,14 @@ export function FloatingBodyScene({
       }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
-      className="h-full w-full touch-none"
+      className="h-full w-full"
+      /*
+       * Decorative: nothing in the scene listens for the pointer. R3F's own wrapper sets
+       * `pointer-events: auto` inline, which beats the `pointer-events-none` every parent
+       * passes down, and with the canvas's touch-action off that made a finger on the body
+       * unable to scroll the page. The style here wins over R3F's default.
+       */
+      style={{ pointerEvents: "none", touchAction: "auto" }}
     >
       <ambientLight intensity={0.55} />
       <directionalLight castShadow intensity={1.1} position={[4, 8, 4]} />

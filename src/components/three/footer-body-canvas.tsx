@@ -13,7 +13,7 @@ export function FooterBodyCanvas() {
       variant="hero"
       enableStretch={false}
       enableFloat={false}
-      className="pointer-events-none touch-none"
+      className="pointer-events-none"
     />
   );
 }

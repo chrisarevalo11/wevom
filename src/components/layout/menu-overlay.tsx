@@ -175,7 +175,6 @@ export function MenuOverlay({ isOpen, onNavigate, id }: MenuOverlayProps) {
                 enableStretch={false}
                 enableFloat={false}
                 showGradient={false}
-                className="touch-none"
               />
             ) : null}
           </div>
