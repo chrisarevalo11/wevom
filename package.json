@@ -46,5 +46,6 @@
     "husky": "^9.1.7",
     "tailwindcss": "^4.1.18",
     "typescript": "~6.0.2"
-  }
+  },
+  "packageManager": "bun@1.4.4"
 }
