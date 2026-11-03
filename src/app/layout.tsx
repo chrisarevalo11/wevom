@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -69,6 +70,8 @@ export default async function RootLayout({
             <CustomCursor />
           </Providers>
         </NextIntlClientProvider>
+        {/* Vercel Web Analytics: page views and the custom events it is handed, no cookies */}
+        <Analytics />
       </body>
     </html>
   );
