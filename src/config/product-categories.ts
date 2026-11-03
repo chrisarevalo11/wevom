@@ -71,6 +71,10 @@ const PRODUCT_TYPE_ALIASES: Record<string, ProductFamily> = {
   medias: "accessories",
   accessory: "accessories",
   accessories: "accessories",
+  // The store files its accessories under the product type "Otros"
+  otros: "accessories",
+  otro: "accessories",
+  other: "accessories",
 };
 
 export function normalizeProductType(raw: string): string {

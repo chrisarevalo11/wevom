@@ -42,6 +42,11 @@ const DEFAULT_OPTION_NAME = "Title";
  * on the page. Until it exists the showcase falls back to the newest products.
  */
 const SHOWCASE_COLLECTION_HANDLE = "frontpage";
+/**
+ * The collection the merchant orders by hand for the products page ("all products" in Admin).
+ * While it is missing or empty the page lists every product, newest first.
+ */
+const CATALOG_COLLECTION_HANDLE = "all-products";
 
 /** Products without a single image still need a box to sit in */
 const FALLBACK_IMAGE = "/images/p1.png";
@@ -60,12 +65,14 @@ const cachedProducts = unstable_cache(
   { tags: [PRODUCTS_TAG], revalidate: REVALIDATE_SECONDS },
 );
 
-const cachedShowcaseCollection = unstable_cache(
-  (locale: Locale) =>
-    getCollectionProducts(SHOWCASE_COLLECTION_HANDLE, CATALOG_COUNT, locale),
-  ["shopify-showcase-collection"],
-  { tags: [PRODUCTS_TAG], revalidate: REVALIDATE_SECONDS },
-);
+/** A curated collection, in the order the merchant arranged it; null when it does not exist */
+function cachedCollection(handle: string, locale: Locale) {
+  return unstable_cache(
+    () => getCollectionProducts(handle, CATALOG_COUNT, locale),
+    ["shopify-collection", handle, locale],
+    { tags: [PRODUCTS_TAG], revalidate: REVALIDATE_SECONDS },
+  )();
+}
 
 function cachedProduct(handle: string, locale: Locale) {
   return unstable_cache(
@@ -120,7 +127,7 @@ export async function getShowcaseItems(): Promise<ProductCardItem[]> {
   const locale = await currentLocale();
 
   try {
-    const curated = await cachedShowcaseCollection(locale);
+    const curated = await cachedCollection(SHOWCASE_COLLECTION_HANDLE, locale);
     const products =
       curated && curated.length > 0
         ? curated
@@ -138,7 +145,11 @@ export async function getCatalogItems(): Promise<CatalogItem[]> {
   const locale = await currentLocale();
 
   try {
-    const { products } = await cachedProducts(CATALOG_COUNT, locale);
+    const curated = await cachedCollection(CATALOG_COLLECTION_HANDLE, locale);
+    const products =
+      curated && curated.length > 0
+        ? curated
+        : (await cachedProducts(CATALOG_COUNT, locale)).products;
     return products.map((product) => toCatalogItem(product, locale));
   } catch (error) {
     reportError("catalog", error);
