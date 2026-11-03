@@ -8,6 +8,7 @@ import { CustomCursor } from "@/components/ui/custom-cursor";
 import { ProductTransitionOverlay } from "@/components/ui/product-transition-overlay";
 import { siteConfig } from "@/config/site";
 import { CartDrawer } from "@/features/cart/cart-drawer";
+import { OrderCompleteNotice } from "@/features/checkout/order-complete-notice";
 import { fontVariables, sourceCodePro } from "@/lib/fonts";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -60,6 +61,8 @@ export default async function RootLayout({
             <CartDrawer />
             {/* One instance for every entry point that would otherwise start a purchase */}
             <ComingSoonModal />
+            {/* Says thanks when the visitor lands back from Shopify's checkout */}
+            <OrderCompleteNotice />
             {/* Outlives both pages, so a product image can cross between them */}
             <ProductTransitionOverlay />
             {/* Renders nothing on touch devices and under reduced motion */}

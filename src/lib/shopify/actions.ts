@@ -332,3 +332,51 @@ export async function setShippingDetailsAction(
     };
   }
 }
+
+/** Hosts a buyer comes back from after paying: Shopify's checkout, or the store's own domain */
+function isShopifyReferrer(referrer: string): boolean {
+  if (!referrer) return false;
+  try {
+    const host = new URL(referrer).hostname;
+    return (
+      host === process.env.SHOPIFY_STORE_DOMAIN ||
+      host.endsWith(".myshopify.com") ||
+      host.endsWith(".shopify.com") ||
+      host.endsWith(".shop.app")
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Whether the visitor has just completed an order. Shopify's checkout cannot send the buyer
+ * to a page of ours with an order id, but it does consume the cart: once the order is placed
+ * the cart id in the cookie stops resolving. A cart also stops resolving when it expires after
+ * ten days of inactivity, so the page the buyer came from has to be Shopify's before the
+ * gone cart is read as a sale. Either way the stale cookie is dropped, so the next add to cart
+ * starts a fresh one.
+ *
+ * In development the referrer check is skipped: Shopify's HTTPS checkout never sends one
+ * to a plain-HTTP localhost.
+ */
+export async function consumeCompletedCartAction(referrer: string): Promise<boolean> {
+  if (!isShopifyConfigured()) return false;
+
+  const cartId = await getCartIdFromCookie();
+  if (!cartId) return false;
+
+  try {
+    const cart = await getCart(cartId);
+    if (cart) return false;
+  } catch {
+    // A failed request says nothing about the cart; try again on the next page
+    return false;
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.delete(SHOPIFY_CART_COOKIE);
+  revalidateCartPaths();
+
+  return process.env.NODE_ENV !== "production" || isShopifyReferrer(referrer);
+}

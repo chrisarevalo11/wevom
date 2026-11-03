@@ -75,3 +75,12 @@ html.cursor-none * {
   @apply text-center;
 }
 
+/* Used by the checkout hand-off sheet, which fades the page to its own colour before leaving */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

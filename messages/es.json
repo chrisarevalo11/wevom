@@ -104,6 +104,11 @@
     "message": "Pronto podras comprar en la tienda virtual <3",
     "close": "cerrar"
   },
+  "orderComplete": {
+    "title": "Gracias por tu pedido <3",
+    "body": "Te enviamos la confirmación y los detalles del envío a tu correo.",
+    "close": "seguir viendo"
+  },
   "summary": {
     "meta": {
       "title": "Resumen",
@@ -130,8 +135,7 @@
       "fields": {
         "email": "Correo electrónico",
         "phone": "Teléfono",
-        "firstName": "Nombre",
-        "lastName": "Apellido",
+        "fullName": "Nombre completo",
         "address1": "Dirección",
         "address2": "Apartamento, torre, etc. (opcional)",
         "city": "Ciudad",

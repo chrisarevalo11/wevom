@@ -104,6 +104,11 @@
     "message": "You'll be able to shop online soon <3",
     "close": "close"
   },
+  "orderComplete": {
+    "title": "Thank you for your order <3",
+    "body": "We've sent the confirmation and shipping details to your email.",
+    "close": "keep browsing"
+  },
   "summary": {
     "meta": {
       "title": "Summary",
@@ -130,8 +135,7 @@
       "fields": {
         "email": "Email",
         "phone": "Phone",
-        "firstName": "First name",
-        "lastName": "Last name",
+        "fullName": "Full name",
         "address1": "Address",
         "address2": "Apartment, tower, etc. (optional)",
         "city": "City",
