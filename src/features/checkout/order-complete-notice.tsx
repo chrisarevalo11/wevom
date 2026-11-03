@@ -1,15 +1,28 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { consumeCompletedCartAction } from "@/lib/shopify/actions";
+import {
+  clearCartAfterOrderAction,
+  consumeCompletedCartAction,
+} from "@/lib/shopify/actions";
+
+/**
+ * The query flag Shopify's thank-you page comes back with, added by the storefront theme's
+ * bounce when the buyer arrives from the order confirmation. Read and then removed from the
+ * address bar, so a reload or a shared link does not repeat the thanks.
+ */
+export const ORDER_COMPLETE_PARAM = "order";
+const ORDER_COMPLETE_VALUE = "complete";
 
 /**
  * The "thank you" the site shows when a buyer lands back from Shopify's checkout. Mounted once
- * in the root layout: on the first page load it asks the server whether the cart in the
- * cookie has been consumed by an order, and if so says thanks and lets the cart start over.
+ * in the root layout. Two signals, either is enough: the order flag in the URL, which the
+ * thank-you page's "continue shopping" carries, or a cart in the cookie that Shopify has
+ * consumed by an order. On either the cookie is dropped so the cart starts over.
  *
  * Shopify's own order confirmation (and the email) remain the receipt; this is the site
  * picking the visitor back up, not a second confirmation.
@@ -17,21 +30,36 @@ import { consumeCompletedCartAction } from "@/lib/shopify/actions";
 export function OrderCompleteNotice() {
   const t = useTranslations("orderComplete");
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelled = false;
-    consumeCompletedCartAction(document.referrer).then((completed) => {
-      if (cancelled || !completed) return;
-      // The drawer may have cached the gone cart as empty already; make sure it agrees
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    const url = new URL(window.location.href);
+    const flagged = url.searchParams.get(ORDER_COMPLETE_PARAM) === ORDER_COMPLETE_VALUE;
+    const check = flagged
+      ? clearCartAfterOrderAction()
+      : consumeCompletedCartAction(document.referrer);
+    check.then((completed) => {
+      if (cancelled) return;
+      if (flagged) {
+        // Through the router, so the refresh the action triggers does not put it back
+        url.searchParams.delete(ORDER_COMPLETE_PARAM);
+        router.replace(`${pathname}${url.search}`, { scroll: false });
+      }
+      if (!completed) return;
+      // The cart is gone: drop whatever the drawer fetched meanwhile, and anything still
+      // in flight, rather than asking Shopify about a cart the cookie no longer names
+      queryClient.cancelQueries({ queryKey: ["cart"] });
+      queryClient.setQueryData(["cart"], null);
       setOpen(true);
     });
     return () => {
       cancelled = true;
     };
-  }, [queryClient]);
+  }, [queryClient, router, pathname]);
 
   useEffect(() => {
     if (!open) return;

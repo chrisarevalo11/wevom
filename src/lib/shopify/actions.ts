@@ -374,9 +374,27 @@ export async function consumeCompletedCartAction(referrer: string): Promise<bool
     return false;
   }
 
+  await dropCartCookie();
+
+  return process.env.NODE_ENV !== "production" || isShopifyReferrer(referrer);
+}
+
+/**
+ * The certain version of the above: Shopify's thank-you page sends the buyer back to the
+ * site with an order flag in the URL (set by the storefront theme's bounce), so there is no
+ * guessing from the cart. Some gateways leave the completed cart readable for a while, which
+ * is why the flag exists. The cookie is dropped either way so the next visit starts clean.
+ */
+export async function clearCartAfterOrderAction(): Promise<boolean> {
+  if (!isShopifyConfigured()) return false;
+  const cartId = await getCartIdFromCookie();
+  if (!cartId) return false;
+  await dropCartCookie();
+  return true;
+}
+
+async function dropCartCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(SHOPIFY_CART_COOKIE);
   revalidateCartPaths();
-
-  return process.env.NODE_ENV !== "production" || isShopifyReferrer(referrer);
 }
